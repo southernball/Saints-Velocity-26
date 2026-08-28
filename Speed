@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Engine</title>
+<style>
+:root{
+  color-scheme: light;
+  --surface:#fcfcfb; --card:#ffffff; --line:#e8e7e3; --grid:#efeeea;
+  --ink:#0b0b0b; --ink2:#52514e; --ink3:#8a8984;
+  --accent:#2a78d6; --accent-soft:rgba(42,120,214,.10);
+  --good:#008300; --bad:#e34948; --gold:#fff3d1; --goldline:#eda100;
+  --chipbg:#f1f0ec;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --surface:#1a1a19; --card:#232322; --line:#3a3936; --grid:#2e2d2b;
+    --ink:#ffffff; --ink2:#c3c2b7; --ink3:#8a8984;
+    --accent:#3987e5; --accent-soft:rgba(57,135,229,.16);
+    --good:#3fae3f; --bad:#e66767; --gold:#3a331d; --goldline:#c98500;
+    --chipbg:#2c2b29;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface:#1a1a19; --card:#232322; --line:#3a3936; --grid:#2e2d2b;
+  --ink:#ffffff; --ink2:#c3c2b7; --ink3:#8a8984;
+  --accent:#3987e5; --accent-soft:rgba(57,135,229,.16);
+  --good:#3fae3f; --bad:#e66767; --gold:#3a331d; --goldline:#c98500;
+  --chipbg:#2c2b29;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);
+  font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 20px 60px}
+header.top{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;
+  padding:14px 0 10px;border-bottom:1px solid var(--line)}
+.brand h1{font-size:20px;margin:0;letter-spacing:.2px}
+.brand .sub{color:var(--ink2);font-size:12px;margin-top:2px}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
+nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink2);
+  padding:7px 14px;border-radius:18px;font:600 13px inherit;font-family:inherit;cursor:pointer}
+nav.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+nav.tabs button:hover:not(.on){background:var(--chipbg)}
+.view{display:none}.view.on{display:block}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink2);padding:5px 12px;
+  border-radius:15px;font:600 12px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip:hover:not(.on){background:var(--chipbg)}
+.search{flex:1;min-width:170px;max-width:290px;position:relative}
+.search input{width:100%;padding:7px 12px 7px 30px;border:1px solid var(--line);border-radius:16px;
+  background:var(--card);color:var(--ink);font:13px inherit;font-family:inherit}
+.search::before{content:"⌕";position:absolute;left:10px;top:5px;color:var(--ink3);font-size:15px}
+.spacer{flex:1}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.tile .lb{font:600 10.5px inherit;font-family:inherit;letter-spacing:.6px;color:var(--ink3);text-transform:uppercase}
+.tile .v{font-size:22px;font-weight:650;margin-top:2px}
+.tile .v.hero{font-size:30px}
+.tile .d{font-size:12px;color:var(--ink2);margin-top:1px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+table.lb{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.lb th{font:600 10.5px inherit;font-family:inherit;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--ink3);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:default}
+table.lb th.sortable{cursor:pointer;user-select:none}
+table.lb th.sortable:hover{color:var(--ink)}
+table.lb th.sorted{color:var(--accent)}
+table.lb td{padding:7px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
+table.lb tr.rowbtn{cursor:pointer}
+table.lb tr.rowbtn:hover td{background:var(--accent-soft)}
+table.lb tr.top3 td{background:var(--gold)}
+table.lb tr.top3:hover td{background:var(--gold);box-shadow:inset 0 0 0 99em rgba(42,120,214,.06)}
+.rank{font-weight:700}
+td.name{font-weight:600}
+.tag{display:inline-block;background:var(--chipbg);color:var(--ink2);font:600 11px inherit;font-family:inherit;
+  border-radius:9px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+.delta{font-weight:600}
+.delta.good{color:var(--good)}.delta.bad{color:var(--bad)}.delta.na{color:var(--ink3);font-weight:400}
+.muted{color:var(--ink2)}.small{font-size:12px}.tiny{font-size:11px;color:var(--ink3)}
+h2{font-size:16px;margin:18px 0 8px}
+h3{font-size:14px;margin:0 0 6px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.mcard .mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.mstats{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 4px}
+.mstats .ms .lb{font:600 10px inherit;font-family:inherit;letter-spacing:.5px;color:var(--ink3);text-transform:uppercase}
+.mstats .ms .v{font-size:19px;font-weight:650}
+.mstats .ms .v .u{font-size:12px;color:var(--ink2);font-weight:500}
+.ranksline{font-size:12px;color:var(--ink2);margin:2px 0 6px}
+.ranksline b{color:var(--ink)}
+.backbtn{border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:16px;
+  padding:6px 14px;font:600 12px inherit;font-family:inherit;cursor:pointer;margin-right:8px}
+.backbtn:hover{background:var(--chipbg)}
+.ath-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+.ath-h h2{margin:0;font-size:22px}
+svg text{font-family:inherit}
+.chartbox{position:relative}
+.tooltip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);
+  border-radius:7px;padding:6px 9px;font-size:12px;opacity:0;transition:opacity .08s;z-index:5;
+  white-space:nowrap;transform:translate(-50%,-110%)}
+.tooltip .tv{font-weight:700;font-size:13px}
+details.slog{margin-top:6px}
+details.slog summary{cursor:pointer;color:var(--ink2);font-size:12px}
+details.slog table{margin-top:6px;font-size:12px}
+.pastegrid{display:grid;grid-template-columns:1fr;gap:12px}
+textarea.paste{width:100%;min-height:130px;border:1.5px dashed var(--line);border-radius:10px;
+  background:var(--surface);color:var(--ink);font:12px ui-monospace,Consolas,monospace;padding:10px;resize:vertical}
+textarea.paste:focus{border-color:var(--accent);outline:none}
+.statusrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
+.st{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
+.st .ok{color:var(--good);font-weight:700}
+.st .no{color:var(--ink3)}
+.btn{border:0;background:var(--accent);color:#fff;padding:8px 16px;border-radius:18px;
+  font:600 13px inherit;font-family:inherit;cursor:pointer}
+.btn.ghost{background:var(--card);color:var(--ink2);border:1px solid var(--line)}
+.btn:hover{filter:brightness(1.06)}
+.formrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.formrow label{font-size:13px;color:var(--ink2);min-width:170px}
+.formrow input[type=text],.formrow input[type=number],.formrow input[type=url]{
+  padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);
+  color:var(--ink);font:13px inherit;font-family:inherit;min-width:230px}
+.note{font-size:12px;color:var(--ink2);background:var(--chipbg);border-radius:8px;padding:8px 12px;margin:8px 0}
+.warnbox{font-size:12px;color:var(--bad);margin:6px 0;white-space:pre-line}
+.empty{padding:40px 20px;text-align:center;color:var(--ink2)}
+.medal{font-weight:800}
+@media (max-width:640px){ .tiles{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1 id="progName">Dashboard Engine</h1>
+      <div class="sub" id="asOf">No data loaded yet</div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-v="team" class="on">Team</button>
+      <button data-v="athletes">Athletes</button>
+      <button data-v="records">Records</button>
+      <button data-v="data">Data &amp; Setup</button>
+    </nav>
+  </header>
+
+  <!-- TEAM -->
+  <section class="view on" id="view-team">
+    <div class="controls">
+      <div class="chips" id="metricChips"></div>
+    </div>
+    <div class="controls">
+      <div class="chips" id="sportChips"></div>
+      <div class="chips" id="genderChips"></div>
+      <div class="chips" id="gradeChips"></div>
+      <div class="chips" id="scopeChips"></div>
+      <div class="spacer"></div>
+      <div class="search"><input id="teamSearch" type="text" placeholder="Find an athlete…" autocomplete="off"></div>
+    </div>
+    <div class="tiles" id="teamTiles"></div>
+    <div class="card" style="padding:6px 10px;overflow-x:auto">
+      <table class="lb" id="lbTable"></table>
+      <div class="empty" id="teamEmpty" style="display:none"></div>
+    </div>
+  </section>
+
+  <!-- ATHLETES -->
+  <section class="view" id="view-athletes">
+    <div id="athHome">
+      <div class="controls">
+        <div class="chips" id="athSportChips"></div>
+        <div class="chips" id="athGenderChips"></div>
+        <div class="chips" id="athGradeChips"></div>
+        <div class="spacer"></div>
+        <div class="search"><input id="athSearch" type="text" placeholder="Find an athlete…" autocomplete="off"></div>
+      </div>
+      <div class="card" style="padding:6px 10px;overflow-x:auto">
+        <table class="lb" id="athTable"></table>
+        <div class="empty" id="athEmpty" style="display:none"></div>
+      </div>
+    </div>
+    <div id="athDetail" style="display:none"></div>
+  </section>
+
+  <!-- RECORDS -->
+  <section class="view" id="view-records">
+    <div class="controls">
+      <div class="chips" id="recScopeChips"></div>
+      <div class="chips" id="recSportChips"></div>
+      <div class="chips" id="recGenderChips"></div>
+    </div>
+    <div class="grid2" id="recGrid"></div>
+    <div class="empty" id="recEmpty" style="display:none"></div>
+  </section>
+
+  <!-- DATA & SETUP -->
+  <section class="view" id="view-data">
+    <h2 style="margin-top:14px">Feed the dashboard</h2>
+    <div class="note">Open your Data Sheet, go to a tab, <b>select all (Ctrl+A), copy (Ctrl+C)</b>, click the box below, and <b>paste (Ctrl+V)</b>. The dashboard recognizes which tab you pasted by its headers. Paste all three tabs — any order. Re-pasting a tab replaces it.</div>
+    <div class="pastegrid">
+      <textarea class="paste" id="pasteBox" placeholder="Paste a tab from your Data Sheet here (Data, Athletes, or Metrics)…"></textarea>
+    </div>
+    <div class="warnbox" id="pasteWarn"></div>
+    <div class="statusrow">
+      <div class="st"><div class="lb tiny">DATA (results)</div><div id="stData" class="no">nothing yet</div></div>
+      <div class="st"><div class="lb tiny">ATHLETES (roster)</div><div id="stAth" class="no">nothing yet</div></div>
+      <div class="st"><div class="lb tiny">METRICS (definitions)</div><div id="stMet" class="no">nothing yet</div></div>
+    </div>
+    <div class="formrow">
+      <button class="btn ghost" id="loadSample">Load sample data (Coach Josh's Fly 10s)</button>
+      <button class="btn ghost" id="clearAll">Clear everything</button>
+    </div>
+
+    <h2>Settings</h2>
+    <div class="card">
+      <div class="formrow"><label for="setProg">Program name</label><input type="text" id="setProg" placeholder="e.g. Central HS Football"></div>
+      <div class="formrow"><label for="setSenior">Current senior class year</label><input type="number" id="setSenior" min="2000" max="2100" style="min-width:110px">
+        <span class="tiny">2027 = the 2026–27 school year. Grades and “current vs. alumni” come from this.</span></div>
+      <div class="formrow"><label for="setShort">Shorten names (First L.)</label><input type="checkbox" id="setShort">
+        <span class="tiny">Use when sharing the dashboard beyond the coaching staff.</span></div>
+    </div>
+
+    <h2>Optional: auto-load from your Google Sheet</h2>
+    <div class="card">
+      <div class="tiny" style="margin-bottom:8px">One-time upgrade so you never paste again: in Google Sheets open <b>File → Share → Publish to web</b>, choose a tab, pick <b>Comma-separated values (.csv)</b>, publish, and paste each tab's link below. The dashboard will pull fresh data every time it opens. Heads up: anyone who has a published link can read that tab — full names included — so share it deliberately.</div>
+      <div class="formrow"><label for="lnkData">Data tab CSV link</label><input type="url" id="lnkData" placeholder="https://docs.google.com/…&output=csv"></div>
+      <div class="formrow"><label for="lnkAth">Athletes tab CSV link</label><input type="url" id="lnkAth" placeholder="https://docs.google.com/…&output=csv"></div>
+      <div class="formrow"><label for="lnkMet">Metrics tab CSV link</label><input type="url" id="lnkMet" placeholder="https://docs.google.com/…&output=csv"></div>
+      <div class="formrow"><button class="btn" id="fetchLinks">Save links &amp; refresh now</button><span class="tiny" id="fetchStatus"></span></div>
+    </div>
+    <div class="tiny">Everything stays in this browser. Nothing is uploaded anywhere by this page.</div>
+  </section>
+</div>
+<div class="tooltip" id="tip"></div>
+<script>
+"use strict";
+/* ================= Dashboard Engine — data layer ================= */
+const SAMPLE = {
+  data: `Date	Athlete ID	Metric	Rep	Value	Notes
+2026-08-19	adams-james	Fly 10	1	1.044	in-season best entered from 8/26 clipboard sheet
+2026-08-19	beale-colton	Fly 10	1	1.084	in-season best entered from 8/26 clipboard sheet
+2026-08-19	creekmore-eddie	Fly 10	1	1.31	in-season best entered from 8/26 clipboard sheet
+2026-08-19	dorshimer-tyler	Fly 10	1	1.077	in-season best entered from 8/26 clipboard sheet
+2026-08-19	goodman-cole	Fly 10	1	1.034	in-season best entered from 8/26 clipboard sheet
+2026-08-19	lowe-weston	Fly 10	1	1.363	in-season best entered from 8/26 clipboard sheet
+2026-08-19	simpson-josh-jr	Fly 10	1	1.271	in-season best entered from 8/26 clipboard sheet
+2026-08-19	watson-michael	Fly 10	1	1.132	in-season best entered from 8/26 clipboard sheet
+2026-08-19	williams-jett	Fly 10	1	1.066	in-season best entered from 8/26 clipboard sheet
+2026-08-19	bitgood-parker	Fly 10	1	1.005	in-season best entered from 8/26 clipboard sheet
+2026-08-19	blackmer-nico	Fly 10	1	1.161	in-season best entered from 8/26 clipboard sheet
+2026-08-19	fawcett-owen	Fly 10	1	1.507	in-season best entered from 8/26 clipboard sheet
+2026-08-19	godwin-tj	Fly 10	1	1.107	in-season best entered from 8/26 clipboard sheet
+2026-08-19	hamilton-landon	Fly 10	1	1.29	in-season best entered from 8/26 clipboard sheet
+2026-08-19	hills-cayden	Fly 10	1	1.185	in-season best entered from 8/26 clipboard sheet
+2026-08-19	lebrecht-hampton	Fly 10	1	1.307	in-season best entered from 8/26 clipboard sheet
+2026-08-19	morgan-charlie	Fly 10	1	1.223	in-season best entered from 8/26 clipboard sheet
+2026-08-19	ortell-david	Fly 10	1	1.158	in-season best entered from 8/26 clipboard sheet
+2026-08-19	sims-jack	Fly 10	1	1.139	in-season best entered from 8/26 clipboard sheet
+2026-08-19	stafford-jayden	Fly 10	1	1.062	in-season best entered from 8/26 clipboard sheet
+2026-08-19	west-cooper	Fly 10	1	1.238	in-season best entered from 8/26 clipboard sheet
+2026-08-19	willman-johnson-william	Fly 10	1	1.369	in-season best entered from 8/26 clipboard sheet
+2026-08-19	work-michael	Fly 10	1	1.08	in-season best entered from 8/26 clipboard sheet
+2026-08-19	bluitt-christian	Fly 10	1	1.192	in-season best entered from 8/26 clipboard sheet
+2026-08-19	burke-jahmairie	Fly 10	1	1.429	in-season best entered from 8/26 clipboard sheet
+2026-08-19	coppock-zack	Fly 10	1	1.373	in-season best entered from 8/26 clipboard sheet
+2026-08-19	curry-nate	Fly 10	1	1.208	in-season best entered from 8/26 clipboard sheet
+2026-08-19	ducote-jaxon	Fly 10	1	1.173	in-season best entered from 8/26 clipboard sheet
+2026-08-19	koch-lennon	Fly 10	1	1.202	in-season best entered from 8/26 clipboard sheet
+2026-08-19	maddox-austin	Fly 10	1	1.197	in-season best entered from 8/26 clipboard sheet
+2026-08-19	perez-jr	Fly 10	1	1.29	in-season best entered from 8/26 clipboard sheet
+2026-08-19	ricks-nicholas	Fly 10	1	1.311	in-season best entered from 8/26 clipboard sheet
+2026-08-19	shearin-kellan	Fly 10	1	1.087	in-season best entered from 8/26 clipboard sheet
+2026-08-19	sweeney-jackson	Fly 10	1	1.13	in-season best entered from 8/26 clipboard sheet
+2026-08-19	totten-henley	Fly 10	1	1.096	in-season best entered from 8/26 clipboard sheet
+2026-08-19	winslow-colin	Fly 10	1	1.181	in-season best entered from 8/26 clipboard sheet
+2026-08-19	alphin-hudson	Fly 10	1	1.09	in-season best entered from 8/26 clipboard sheet
+2026-08-19	clary-hayden	Fly 10	1	1.178	in-season best entered from 8/26 clipboard sheet
+2026-08-19	eliason-cole	Fly 10	1	1.149	in-season best entered from 8/26 clipboard sheet
+2026-08-19	johnson-henry	Fly 10	1	1.221	in-season best entered from 8/26 clipboard sheet
+2026-08-19	manno-ace	Fly 10	1	1.149	in-season best entered from 8/26 clipboard sheet
+2026-08-19	wikel-colton	Fly 10	1	1.394	in-season best entered from 8/26 clipboard sheet
+2026-08-26	adams-james	Fly 10	1	1.054	
+2026-08-26	adams-james	Fly 10	2	1.037	
+2026-08-26	barnes-charles	Fly 10	1	0.998	
+2026-08-26	barnes-charles	Fly 10	2	1.002	
+2026-08-26	beale-colton	Fly 10	1	1.065	
+2026-08-26	beale-colton	Fly 10	2	1.049	
+2026-08-26	creekmore-eddie	Fly 10	1	1.216	
+2026-08-26	creekmore-eddie	Fly 10	2	1.21	
+2026-08-26	dorshimer-tyler	Fly 10	1	1.043	
+2026-08-26	dorshimer-tyler	Fly 10	2	1.046	
+2026-08-26	goodman-cole	Fly 10	1	1.026	
+2026-08-26	owen-alexei	Fly 10	1	1.175	
+2026-08-26	owen-alexei	Fly 10	2	1.163	
+2026-08-26	watson-michael	Fly 10	1	1.142	
+2026-08-26	watson-michael	Fly 10	2	1.163	
+2026-08-26	williams-jett	Fly 10	1	1.095	
+2026-08-26	williams-jett	Fly 10	2	1.124	
+2026-08-26	bitgood-parker	Fly 10	1	1.025	
+2026-08-26	bitgood-parker	Fly 10	2	1.04	
+2026-08-26	blackmer-nico	Fly 10	1	1.146	
+2026-08-26	blackmer-nico	Fly 10	2	1.123	
+2026-08-26	dunlow-brennan	Fly 10	1	1.436	
+2026-08-26	dunlow-brennan	Fly 10	2	1.389	
+2026-08-26	fawcett-owen	Fly 10	1	1.42	
+2026-08-26	fawcett-owen	Fly 10	2	1.368	
+2026-08-26	hills-cayden	Fly 10	1	1.147	
+2026-08-26	hills-cayden	Fly 10	2	1.164	
+2026-08-26	howell-dj	Fly 10	1	1.173	
+2026-08-26	howell-dj	Fly 10	2	1.138	
+2026-08-26	lebrecht-hampton	Fly 10	1	1.254	
+2026-08-26	lebrecht-hampton	Fly 10	2	1.268	
+2026-08-26	morgan-charlie	Fly 10	1	1.25	
+2026-08-26	morgan-charlie	Fly 10	2	1.232	
+2026-08-26	ortell-david	Fly 10	1	1.073	
+2026-08-26	ortell-david	Fly 10	2	1.099	
+2026-08-26	patel-om	Fly 10	1	1.254	
+2026-08-26	patel-om	Fly 10	2	1.207	
+2026-08-26	sims-jack	Fly 10	1	1.032	
+2026-08-26	sims-jack	Fly 10	2	1.036	
+2026-08-26	stafford-jayden	Fly 10	1	1.085	
+2026-08-26	stafford-jayden	Fly 10	2	1.094	
+2026-08-26	west-cooper	Fly 10	1	1.106	
+2026-08-26	west-cooper	Fly 10	2	1.116	
+2026-08-26	willman-johnson-william	Fly 10	1	1.339	
+2026-08-26	willman-johnson-william	Fly 10	2	1.278	
+2026-08-26	work-michael	Fly 10	1	1.06	
+2026-08-26	work-michael	Fly 10	2	1.028	
+2026-08-26	bluitt-christian	Fly 10	1	1.094	
+2026-08-26	bluitt-christian	Fly 10	2	1.097	
+2026-08-26	burke-jahmairie	Fly 10	1	1.352	
+2026-08-26	burke-jahmairie	Fly 10	2	1.33	
+2026-08-26	coppock-zack	Fly 10	1	1.284	
+2026-08-26	coppock-zack	Fly 10	2	1.293	
+2026-08-26	curry-nate	Fly 10	1	1.104	
+2026-08-26	curry-nate	Fly 10	2	1.123	
+2026-08-26	ducote-jaxon	Fly 10	1	1.09	
+2026-08-26	ducote-jaxon	Fly 10	2	1.072	
+2026-08-26	fitzwater-nolan	Fly 10	1	1.104	
+2026-08-26	fitzwater-nolan	Fly 10	2	1.123	
+2026-08-26	koch-lennon	Fly 10	1	1.108	
+2026-08-26	koch-lennon	Fly 10	2	1.089	
+2026-08-26	maddox-austin	Fly 10	1	1.184	
+2026-08-26	maddox-austin	Fly 10	2	1.169	
+2026-08-26	mitchell-sebastian	Fly 10	1	1.026	
+2026-08-26	mitchell-sebastian	Fly 10	2	0.993	
+2026-08-26	perez-jr	Fly 10	1	1.206	
+2026-08-26	perez-jr	Fly 10	2	1.201	
+2026-08-26	ricks-nicholas	Fly 10	1	1.192	
+2026-08-26	ricks-nicholas	Fly 10	2	1.132	
+2026-08-26	shearin-kellan	Fly 10	1	1.023	
+2026-08-26	shearin-kellan	Fly 10	2	1.051	
+2026-08-26	sweeney-jackson	Fly 10	1	1.054	
+2026-08-26	sweeney-jackson	Fly 10	2	1.033	
+2026-08-26	totten-henley	Fly 10	1	1.1	
+2026-08-26	totten-henley	Fly 10	2	1.085	
+2026-08-26	alphin-hudson	Fly 10	1	1.078	
+2026-08-26	alphin-hudson	Fly 10	2	1.067	
+2026-08-26	clary-hayden	Fly 10	1	1.104	
+2026-08-26	clary-hayden	Fly 10	2	1.11	
+2026-08-26	eliason-cole	Fly 10	1	1.118	
+2026-08-26	eliason-cole	Fly 10	2	1.088	
+2026-08-26	johnson-henry	Fly 10	1	1.241	
+2026-08-26	johnson-henry	Fly 10	2	1.213	
+2026-08-26	manno-ace	Fly 10	1	1.134	
+2026-08-26	manno-ace	Fly 10	2	1.102	
+2026-08-26	wikel-colton	Fly 10	1	1.33	
+2026-08-26	wikel-colton	Fly 10	2	1.341	`,
+  athletes: `Athlete ID	Last Name	First Name	Grad Year	Position	Notes	Gender (Boys/Girls)	Sport
+adams-james	Adams	James	2027			Boys	Football
+barnes-charles	Barnes	Charles	2027			Boys	Football
+beale-colton	Beale	Colton	2027			Boys	Football
+creekmore-eddie	Creekmore	Eddie	2027			Boys	Football
+dorshimer-tyler	Dorshimer	Tyler	2027			Boys	Football
+goodman-cole	Goodman	Cole	2027			Boys	Football
+lowe-weston	Lowe	Weston	2027			Boys	Football
+owen-alexei	Owen	Alexei	2027			Boys	Football
+simpson-josh-jr	Simpson	Josh Jr	2027			Boys	Football
+watson-michael	Watson	Michael	2027			Boys	Football
+williams-jett	Williams	Jett	2027			Boys	Football
+bitgood-parker	Bitgood	Parker	2028			Boys	Football
+blackmer-nico	Blackmer	Nico	2028			Boys	Football
+dunlow-brennan	Dunlow	Brennan	2028			Boys	Football
+fawcett-owen	Fawcett	Owen	2028			Boys	Football
+godwin-tj	Godwin	TJ	2028			Boys	Football
+hamilton-landon	Hamilton	Landon	2028			Boys	Football
+hills-cayden	Hills	Cayden	2028			Boys	Football
+howell-dj	Howell	DJ	2028			Boys	Football
+lebrecht-hampton	Lebrecht	Hampton	2028			Boys	Football
+morgan-charlie	Morgan	Charlie	2028			Boys	Football
+ortell-david	Ortell	David	2028			Boys	Football
+patel-om	Patel	Om	2028			Boys	Football
+sims-jack	Sims	Jack	2028			Boys	Football
+stafford-jayden	Stafford	Jayden	2028			Boys	Football
+west-cooper	West	Cooper	2028			Boys	Football
+willman-johnson-william	Willman-Johnson	William	2028		goes by 'Willy-J'	Boys	Football
+work-michael	Work	Michael	2028			Boys	Football
+bluitt-christian	Bluitt	Christian	2029			Boys	Football
+burke-jahmairie	Burke	Jahmairie	2029			Boys	Football
+coppock-zack	Coppock	Zack	2029			Boys	Football
+curry-nate	Curry	Nate	2029			Boys	Football
+ducote-jaxon	Ducote	Jaxon	2029			Boys	Football
+fitzwater-nolan	Fitzwater	Nolan	2029			Boys	Football
+koch-lennon	Koch	Lennon	2029			Boys	Football
+maddox-austin	Maddox	Austin	2029			Boys	Football
+mitchell-sebastian	Mitchell	Sebastian	2029			Boys	Football
+perez-jr	Perez	Jr	2029			Boys	Football
+ricks-nicholas	Ricks	Nicholas	2029			Boys	Football
+shearin-kellan	Shearin	Kellan	2029			Boys	Football
+sweeney-jackson	Sweeney	Jackson	2029			Boys	Football
+totten-henley	Totten	Henley	2029			Boys	Football
+winslow-colin	Winslow	Colin	2029			Boys	Football
+alphin-hudson	Alphin	Hudson	2030			Boys	Football
+clary-hayden	Clary	Hayden	2030			Boys	Football
+eliason-cole	Eliason	Cole	2030			Boys	Football
+johnson-henry	Johnson	Henry	2030			Boys	Football
+manno-ace	Manno	Ace	2030			Boys	Football
+wikel-colton	Wikel	Colton	2030			Boys	Football
+williams-levi	Williams	Levi	2030			Boys	Football`,
+  metrics: `Metric	Unit	Direction (Lower/Higher is better)	Distance (yards, sprints only)	Typical Min	Typical Max	Notes
+Fly 10	seconds	Lower	10	0.9	1.6	Flying 10-yard sprint
+Fly 20	seconds	Lower	20	1.7	3.2	
+40yd Dash	seconds	Lower	40	4.3	7.0	
+10yd Sprint	seconds	Lower	10	1.4	2.6	From a standing start
+Pro Agility	seconds	Lower		3.9	6.0	5-10-5 shuttle
+Bench Press	lbs	Higher		45	405	1-rep max or rep-max estimate
+Back Squat	lbs	Higher		95	605	
+Deadlift	lbs	Higher		95	650	
+Power Clean	lbs	Higher		65	350	
+Vertical Jump	inches	Higher		12	45	
+Broad Jump	inches	Higher		60	130	`
+};
+const MPH_PER_YPS = 2.0454545454545454; /* yards/sec -> mph */
+
+let store = { rows:[], athletes:[], metrics:[],
+  settings:{ program:"", senior:null, short:false },
+  links:{ data:"", athletes:"", metrics:"" } };
+let mem = {};   /* in-memory fallback */
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return mem[k]||null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
+function saveStore(){ lsSet("de_store", JSON.stringify(store)); }
+function loadStore(){
+  const raw = lsGet("de_store");
+  if(raw){ try{ const s = JSON.parse(raw); if(s && s.rows) store = Object.assign(store, s); }catch(e){} }
+}
+
+/* ---------- parsing ---------- */
+function parseTable(text){
+  const t = text.replace(/\r\n?/g,"\n").trim();
+  if(!t) return [];
+  const delim = t.indexOf("\t") >= 0 ? "\t" : ",";
+  const out = []; let row = [], cell = "", inQ = false;
+  for(let i=0;i<t.length;i++){
+    const ch = t[i];
+    if(inQ){
+      if(ch === '"'){ if(t[i+1] === '"'){ cell += '"'; i++; } else inQ = false; }
+      else cell += ch;
+    } else if(ch === '"' && cell === ""){ inQ = true; }
+    else if(ch === delim){ row.push(cell); cell = ""; }
+    else if(ch === "\n"){ row.push(cell); out.push(row); row = []; cell = ""; }
+    else cell += ch;
+  }
+  row.push(cell); out.push(row);
+  return out.filter(r => r.some(c => String(c).trim() !== ""));
+}
+function normHead(h){ return String(h||"").toLowerCase().replace(/[^a-z]/g,""); }
+function parseDate(s){
+  s = String(s).trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return Date.UTC(+m[1], +m[2]-1, +m[3]);
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if(m){ let y = +m[3]; if(y < 100) y += 2000; return Date.UTC(y, +m[1]-1, +m[2]); }
+  const n = Number(s);
+  if(isFinite(n) && n > 20000 && n < 80000) return Date.UTC(1899,11,30) + n*86400000; /* sheet serial */
+  const d = new Date(s); return isNaN(d) ? null : Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+}
+function fmtDate(ms){ const d = new Date(ms);
+  return (d.getUTCMonth()+1)+"/"+d.getUTCDate()+"/"+String(d.getUTCFullYear()).slice(2); }
+function fmtDateLong(ms){ const d = new Date(ms);
+  return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()]+" "+d.getUTCDate()+", "+d.getUTCFullYear(); }
+
+function classify(head){
+  const h = head.map(normHead);
+  if(h.includes("athleteid") && h.includes("value")) return "data";
+  if(h.includes("athleteid") && (h.includes("gradyear") || h.includes("lastname"))) return "athletes";
+  if(h.includes("metric") && (h.some(x=>x.startsWith("direction")) || h.includes("unit"))) return "metrics";
+  return null;
+}
+function ingest(text){
+  const rows = parseTable(text);
+  if(!rows.length) return { ok:false, msg:"Nothing to read in that paste." };
+  const kind = classify(rows[0]);
+  if(!kind) return { ok:false, msg:"Couldn't recognize that paste. Copy a whole tab (headers included) from your Data Sheet — Data, Athletes, or Metrics." };
+  const h = rows[0].map(normHead);
+  const idx = names => { for(const n of names){ const i = h.findIndex(x => x === n || x.startsWith(n)); if(i >= 0) return i; } return -1; };
+  const body = rows.slice(1);
+  const warns = [];
+  if(kind === "data"){
+    const iD = idx(["date"]), iI = idx(["athleteid"]), iM = idx(["metric"]), iR = idx(["rep"]), iV = idx(["value"]), iN = idx(["notes"]);
+    const out = [];
+    body.forEach((r,k) => {
+      const vRaw = String(r[iV] ?? "").trim();
+      if(vRaw === "") return;
+      const v = Number(vRaw.replace(/[^0-9.\-]/g,""));
+      const dte = parseDate(r[iD]);
+      const id = String(r[iI]||"").trim().toLowerCase();
+      const met = String(r[iM]||"").trim();
+      if(!isFinite(v)){ warns.push("Row "+(k+2)+": value isn't a number ("+vRaw+") — skipped."); return; }
+      if(v === 0){ warns.push("Row "+(k+2)+": a zero (blank, never zero) — skipped."); return; }
+      if(!id || !met || dte === null){ warns.push("Row "+(k+2)+": missing date, athlete ID, or metric — skipped."); return; }
+      out.push({ date:dte, id, metric:met, rep:String(r[iR]||"").trim(), value:v, notes:String(iN>=0?(r[iN]||""):"") });
+    });
+    store.rows = out;
+    return { ok:true, kind, n:out.length, warns };
+  }
+  if(kind === "athletes"){
+    const iI = idx(["athleteid"]), iL = idx(["lastname"]), iF = idx(["firstname"]), iG = idx(["gradyear"]), iP = idx(["position"]), iGn = idx(["gender"]), iS = idx(["sport"]);
+    const out = [];
+    body.forEach(r => {
+      const id = String(r[iI]||"").trim().toLowerCase(); if(!id) return;
+      out.push({ id, last:String(r[iL]||"").trim(), first:String(r[iF]||"").trim(),
+        grad:Number(r[iG]) || null, pos:String(iP>=0?(r[iP]||""):"").trim(),
+        gender:normGender(iGn>=0?(r[iGn]||""):""), sport:String(iS>=0?(r[iS]||""):"").trim() });
+    });
+    store.athletes = out;
+    return { ok:true, kind, n:out.length, warns };
+  }
+  const iM = idx(["metric"]), iU = idx(["unit"]), iDr = idx(["direction"]), iDs = idx(["distance"]), iMin = idx(["typicalmin"]), iMax = idx(["typicalmax"]);
+  const out = [];
+  body.forEach(r => {
+    const name = String(r[iM]||"").trim(); if(!name) return;
+    out.push({ name, unit:String(r[iU]||"").trim(),
+      dir:/high/i.test(String(r[iDr]||"")) ? "higher" : "lower",
+      dist:Number(r[iDs]) || null, min:Number(r[iMin]) || null, max:Number(r[iMax]) || null });
+  });
+  store.metrics = out;
+  return { ok:true, kind, n:out.length, warns };
+}
+
+/* ---------- derived model ---------- */
+function normGender(v){
+  v = String(v).trim();
+  if(/^(b|m)/i.test(v)) return "Boys";
+  if(/^(g|f|w)/i.test(v)) return "Girls";
+  return "";
+}
+function distinct(field){
+  const set = new Set();
+  store.athletes.forEach(a => { if(a[field]) set.add(a[field]); });
+  return [...set].sort();
+}
+function poolMatch(a, pool){
+  if(pool && pool.gender && pool.gender !== "All"){ if(!a || a.gender !== pool.gender) return false; }
+  if(pool && pool.sport && pool.sport !== "All"){ if(!a || a.sport.toLowerCase() !== pool.sport.toLowerCase()) return false; }
+  return true;
+}
+function metricDef(name){
+  const m = store.metrics.find(x => x.name.toLowerCase() === name.toLowerCase());
+  if(m) return m;
+  return { name, unit:"", dir:"lower", dist:null, min:null, max:null };
+}
+function seniorYear(){
+  if(store.settings.senior) return store.settings.senior;
+  let latest = 0; store.rows.forEach(r => { if(r.date > latest) latest = r.date; });
+  if(!latest) return new Date().getFullYear() + 1;
+  const d = new Date(latest);
+  return d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+}
+function gradeOf(a){
+  if(!a || !a.grad) return { label:"—", current:false, key:"?" };
+  const sy = seniorYear(), g = 12 - (a.grad - sy);
+  if(g > 12) return { label:"Alum", current:false, key:"Alum" };
+  return { label:String(g), current:true, key:String(g) };
+}
+function athleteById(id){ return store.athletes.find(a => a.id === id) || null; }
+function dispName(a, id){
+  if(!a) return id;
+  if(store.settings.short) return a.first + " " + (a.last ? a.last[0] + "." : "");
+  return a.first + " " + a.last;
+}
+function metricsWithData(){
+  const seen = new Map();
+  store.rows.forEach(r => seen.set(r.metric.toLowerCase(), r.metric));
+  const order = store.metrics.map(m => m.name).filter(n => seen.has(n.toLowerCase()));
+  seen.forEach((orig, low) => { if(!order.some(n => n.toLowerCase() === low)) order.push(orig); });
+  return order;
+}
+function mph(def, v){ return (def.dist && v) ? def.dist * MPH_PER_YPS / v : null; }
+function better(def, a, b){ return def.dir === "lower" ? a < b : a > b; }
+
+/* per-athlete-per-metric stats */
+function statsFor(id, metricName){
+  const def = metricDef(metricName);
+  const reps = store.rows.filter(r => r.id === id && r.metric.toLowerCase() === metricName.toLowerCase());
+  if(!reps.length) return null;
+  const byDate = new Map();
+  reps.forEach(r => {
+    const cur = byDate.get(r.date);
+    if(!cur){ byDate.set(r.date, { best:r.value, reps:[r.value] }); }
+    else { cur.reps.push(r.value); if(better(def, r.value, cur.best)) cur.best = r.value; }
+  });
+  const sessions = [...byDate.entries()].map(([date,s]) => ({ date, best:s.best, reps:s.reps }))
+    .sort((a,b) => a.date - b.date);
+  let pr = reps[0].value, sum = 0;
+  reps.forEach(r => { sum += r.value; if(better(def, r.value, pr)) pr = r.value; });
+  const latest = sessions[sessions.length-1];
+  const prev = sessions.length > 1 ? sessions[sessions.length-2] : null;
+  const delta = prev ? latest.best - prev.best : null;
+  const improved = delta === null ? null : (delta === 0 ? 0 : (better(def, latest.best, prev.best) ? 1 : -1));
+  return { def, reps:reps.length, pr, avg:sum/reps.length, sessions, latest, prev, delta, improved,
+    prDate:(() => { let d=null; for(const s of sessions){ if(s.best === pr){ d = s.date; if(def.dir==="lower"?true:true) break; } } return d; })() };
+}
+/* leaderboard for a metric: every athlete who has data on it, within a gender/sport pool */
+function board(metricName, pool){
+  const def = metricDef(metricName);
+  const ids = new Set();
+  store.rows.forEach(r => { if(r.metric.toLowerCase() === metricName.toLowerCase()) ids.add(r.id); });
+  const rows = [];
+  ids.forEach(id => {
+    const a = athleteById(id);
+    if(!poolMatch(a, pool)) return;
+    const s = statsFor(id, metricName); if(!s) return;
+    const g = gradeOf(a);
+    rows.push({ id, a, g, s });
+  });
+  rows.sort((x,y) => def.dir === "lower" ? x.s.pr - y.s.pr : y.s.pr - x.s.pr);
+  rows.forEach((r,i) => r.allRank = i + 1);
+  let c = 0; rows.forEach(r => { r.curRank = r.g.current ? ++c : null; });
+  const byGrade = {};
+  rows.forEach(r => { byGrade[r.g.key] = (byGrade[r.g.key]||0) + 1; r.gradeRank = byGrade[r.g.key]; });
+  return { def, rows, currentCount:c };
+}
+/* ================= rendering ================= */
+const $ = s => document.querySelector(s);
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text !== undefined && text !== null) e.textContent = text;
+  return e;
+}
+function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+
+const ui = { view:"team", metric:null, grade:"All", scope:"current", sport:"All", gender:"All",
+  recScope:"all", recSport:"All", recGender:"All",
+  teamQ:"", athQ:"", athGrade:"All", athSport:"All", athGender:"All",
+  athlete:null, sort:{ key:"rank", asc:true } };
+
+function fmtVal(v, def){
+  if(v === null || v === undefined) return "—";
+  if(Math.abs(v) < 10) return v.toFixed(3);
+  return Number(v.toFixed(Math.abs(v) < 100 ? 1 : 0)).toString();
+}
+function fmtDelta(delta, improved, def){
+  if(delta === null) return null;
+  const span = el("span", "delta " + (improved > 0 ? "good" : improved < 0 ? "bad" : "na"));
+  const arrow = improved > 0 ? "▲" : improved < 0 ? "▼" : "–";
+  span.textContent = arrow + " " + (delta > 0 ? "+" : "") + fmtVal(delta, def);
+  return span;
+}
+
+/* ---------- SVG helpers ---------- */
+const NS = "http://www.w3.org/2000/svg";
+function sv(tag, attrs){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function sparkline(sessions, def){
+  const W = 96, H = 26, P = 3;
+  const svg = sv("svg", { width:W, height:H, viewBox:`0 0 ${W} ${H}` });
+  if(sessions.length < 2){
+    const c = sv("circle", { cx:W/2, cy:H/2, r:3, fill:"var(--accent)" });
+    svg.appendChild(c); return svg;
+  }
+  const vals = sessions.map(s => s.best);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if(lo === hi){ lo -= 1; hi += 1; }
+  const x = i => P + i * (W - 2*P) / (sessions.length - 1);
+  const y = v => { const t = (v - lo) / (hi - lo); const yy = def.dir === "lower" ? t : 1 - t; return P + yy * (H - 2*P); };
+  const pts = sessions.map((s,i) => x(i) + "," + y(s.best)).join(" ");
+  svg.appendChild(sv("polyline", { points:pts, fill:"none", stroke:"var(--accent)", "stroke-width":2, "stroke-linecap":"round", "stroke-linejoin":"round" }));
+  const last = sessions.length - 1;
+  svg.appendChild(sv("circle", { cx:x(last), cy:y(vals[last]), r:3, fill:"var(--accent)", stroke:"var(--card)", "stroke-width":2 }));
+  return svg;
+}
+
+/* full trend chart: line through session bests + dots per rep, crosshair tooltip */
+function trendChart(stats){
+  const sessions = stats.sessions, def = stats.def;
+  const W = 640, H = 210, L = 48, R = 26, T = 14, B = 30;
+  const box = el("div", "chartbox");
+  const svg = sv("svg", { viewBox:`0 0 ${W} ${H}`, style:"width:100%;height:auto;display:block" });
+  box.appendChild(svg);
+  const allVals = [];
+  sessions.forEach(s => allVals.push(...s.reps));
+  let lo = Math.min(...allVals), hi = Math.max(...allVals);
+  if(lo === hi){ lo -= Math.abs(lo)*0.05 || 1; hi += Math.abs(hi)*0.05 || 1; }
+  const pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+  const n = sessions.length;
+  const x = i => n === 1 ? (L + (W-L-R)/2) : L + i * (W - L - R) / (n - 1);
+  const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  /* gridlines + y ticks (3 clean-ish) */
+  for(let k = 0; k <= 3; k++){
+    const v = lo + (hi - lo) * k / 3, yy = y(v);
+    svg.appendChild(sv("line", { x1:L, x2:W-R, y1:yy, y2:yy, stroke:"var(--grid)", "stroke-width":1 }));
+    const t = sv("text", { x:L-6, y:yy+4, "text-anchor":"end", "font-size":11, fill:"var(--ink3)" });
+    t.textContent = fmtVal(v, def); svg.appendChild(t);
+  }
+  /* x labels — sparse */
+  const step = Math.max(1, Math.ceil(n / 7));
+  sessions.forEach((s,i) => {
+    if(i % step === 0 || i === n-1){
+      const anchor = i === n-1 ? "end" : (i === 0 ? "start" : "middle");
+      const t = sv("text", { x:x(i) + (anchor==="end"?4:anchor==="start"?-4:0), y:H-8, "text-anchor":anchor, "font-size":11, fill:"var(--ink3)" });
+      t.textContent = fmtDate(s.date); svg.appendChild(t);
+    }
+  });
+  /* rep dots (lighter) */
+  sessions.forEach((s,i) => s.reps.forEach(v => {
+    svg.appendChild(sv("circle", { cx:x(i), cy:y(v), r:3.4, fill:"var(--accent)", opacity:0.32 }));
+  }));
+  /* session-best line + dots */
+  if(n > 1){
+    svg.appendChild(sv("polyline", { points:sessions.map((s,i)=>x(i)+","+y(s.best)).join(" "),
+      fill:"none", stroke:"var(--accent)", "stroke-width":2, "stroke-linecap":"round", "stroke-linejoin":"round" }));
+  }
+  sessions.forEach((s,i) => {
+    const isPR = s.best === stats.pr;
+    svg.appendChild(sv("circle", { cx:x(i), cy:y(s.best), r:isPR?5:4, fill:"var(--accent)", stroke:"var(--card)", "stroke-width":2 }));
+    if(isPR){
+      const t = sv("text", { x:x(i), y:y(s.best)-9, "text-anchor":"middle", "font-size":11, "font-weight":700, fill:"var(--ink)" });
+      t.textContent = "PR " + fmtVal(s.best, def); svg.appendChild(t);
+    }
+  });
+  /* crosshair + tooltip */
+  const cross = sv("line", { x1:0, x2:0, y1:T, y2:H-B, stroke:"var(--ink3)", "stroke-width":1, opacity:0 });
+  svg.appendChild(cross);
+  const tip = $("#tip");
+  function showAt(clientX, clientY){
+    const rect = svg.getBoundingClientRect();
+    const sx = (clientX - rect.left) * W / rect.width;
+    let bi = 0, bd = 1e9;
+    for(let i=0;i<n;i++){ const d = Math.abs(x(i)-sx); if(d < bd){ bd = d; bi = i; } }
+    const s = sessions[bi];
+    cross.setAttribute("x1", x(bi)); cross.setAttribute("x2", x(bi)); cross.setAttribute("opacity", 0.5);
+    clear(tip);
+    tip.appendChild(el("div", "tv", fmtVal(s.best, def) + (def.unit ? " " + def.unit : "")));
+    const sub = el("div", null, fmtDateLong(s.date) + " · " + s.reps.length + (s.reps.length === 1 ? " rep" : " reps"));
+    tip.appendChild(sub);
+    if(s.reps.length > 1) tip.appendChild(el("div", null, "reps: " + s.reps.map(v=>fmtVal(v,def)).join(", ")));
+    const m = mph(def, s.best);
+    if(m) tip.appendChild(el("div", null, fmtVal(m,{}) . toString().slice(0,5) ? m.toFixed(1) + " mph" : ""));
+    tip.style.left = (rect.left + window.scrollX + x(bi) * rect.width / W) + "px";
+    tip.style.top = (rect.top + window.scrollY + y(s.best) * rect.height / H) + "px";
+    tip.style.opacity = 1;
+  }
+  svg.addEventListener("pointermove", e => showAt(e.clientX, e.clientY));
+  svg.addEventListener("pointerleave", () => { tip.style.opacity = 0; cross.setAttribute("opacity", 0); });
+  return box;
+}
+
+/* ---------- chips ---------- */
+function chipRow(node, items, activeKey, onPick){
+  clear(node);
+  items.forEach(it => {
+    const b = el("button", "chip" + (it.key === activeKey ? " on" : ""), it.label);
+    b.addEventListener("click", () => onPick(it.key));
+    node.appendChild(b);
+  });
+}
+function facetChips(node, field, allLabel, activeKey, onPick){
+  const vals = distinct(field);
+  if(vals.length < 2){ clear(node); node.style.display = "none"; return "All"; }
+  node.style.display = "";
+  const items = [{ key:"All", label:allLabel }].concat(vals.map(v => ({ key:v, label:v })));
+  if(!items.some(i => i.key === activeKey)) activeKey = "All";
+  chipRow(node, items, activeKey, onPick);
+  return activeKey;
+}
+function gradeChipItems(){
+  const present = new Set();
+  store.athletes.forEach(a => present.add(gradeOf(a).key));
+  const items = [{ key:"All", label:"All grades" }];
+  ["9","10","11","12"].forEach(g => { if(present.has(g)) items.push({ key:g, label:g + "th" }); });
+  if(present.has("Alum")) items.push({ key:"Alum", label:"Alumni" });
+  return items;
+}
+
+/* ---------- TEAM view ---------- */
+function renderTeam(){
+  const mets = metricsWithData();
+  if(!ui.metric || !mets.some(m => m === ui.metric)) ui.metric = mets[0] || null;
+  chipRow($("#metricChips"), mets.map(m => ({ key:m, label:m })), ui.metric, k => { ui.metric = k; render(); });
+  ui.sport = facetChips($("#sportChips"), "sport", "All sports", ui.sport, k => { ui.sport = k; render(); });
+  ui.gender = facetChips($("#genderChips"), "gender", "Boys + Girls", ui.gender, k => { ui.gender = k; render(); });
+  chipRow($("#gradeChips"), gradeChipItems(), ui.grade, k => { ui.grade = k; render(); });
+  chipRow($("#scopeChips"), [{ key:"current", label:"Current team" }, { key:"all", label:"All-time (incl. alumni)" }], ui.scope, k => { ui.scope = k; render(); });
+
+  const tiles = $("#teamTiles"), tbl = $("#lbTable"), empty = $("#teamEmpty");
+  clear(tiles); clear(tbl);
+  if(!store.rows.length || !ui.metric){
+    empty.style.display = "block";
+    empty.textContent = "No data yet — head to Data & Setup and paste your sheet (or load the sample).";
+    return;
+  }
+  empty.style.display = "none";
+  const b = board(ui.metric, { sport:ui.sport, gender:ui.gender });
+  let rows = b.rows;
+  if(ui.scope === "current") rows = rows.filter(r => r.g.current);
+  if(ui.grade !== "All") rows = rows.filter(r => r.g.key === ui.grade);
+  const q = ui.teamQ.trim().toLowerCase();
+  if(q) rows = rows.filter(r => (dispName(r.a, r.id) + " " + r.id).toLowerCase().includes(q));
+
+  /* tiles */
+  const leader = rows[0];
+  const t1 = el("div", "tile");
+  t1.appendChild(el("div", "lb", (ui.scope === "current" ? "Fastest right now" : "All-time best") + (b.def.dir === "higher" ? " (best)" : "")));
+  if(leader){
+    t1.appendChild(el("div", "v hero", fmtVal(leader.s.pr, b.def) + (b.def.unit ? " " : "")));
+    const m = mph(b.def, leader.s.pr);
+    t1.appendChild(el("div", "d", dispName(leader.a, leader.id) + (m ? " · " + m.toFixed(1) + " mph" : "")));
+  } else t1.appendChild(el("div", "v", "—"));
+  tiles.appendChild(t1);
+
+  const avgAll = rows.length ? rows.reduce((s,r) => s + r.s.pr, 0) / rows.length : null;
+  const t2 = el("div", "tile");
+  t2.appendChild(el("div", "lb", "Average PR (this group)"));
+  t2.appendChild(el("div", "v", avgAll === null ? "—" : fmtVal(avgAll, b.def)));
+  t2.appendChild(el("div", "d", rows.length + " athletes"));
+  tiles.appendChild(t2);
+
+  let latest = 0; store.rows.forEach(r => { if(r.metric.toLowerCase() === ui.metric.toLowerCase() && r.date > latest) latest = r.date; });
+  const t3 = el("div", "tile");
+  t3.appendChild(el("div", "lb", "Last session"));
+  t3.appendChild(el("div", "v", latest ? fmtDate(latest) : "—"));
+  const nLatest = new Set(store.rows.filter(r => r.date === latest && r.metric.toLowerCase() === ui.metric.toLowerCase()).map(r => r.id)).size;
+  t3.appendChild(el("div", "d", nLatest ? nLatest + " athletes tested" : ""));
+  tiles.appendChild(t3);
+
+  const improvers = rows.filter(r => r.s.improved > 0).length;
+  const t4 = el("div", "tile");
+  t4.appendChild(el("div", "lb", "Improved last session"));
+  t4.appendChild(el("div", "v", rows.some(r => r.s.improved !== null) ? improvers + " of " + rows.filter(r => r.s.improved !== null).length : "—"));
+  t4.appendChild(el("div", "d", "vs. their previous session"));
+  tiles.appendChild(t4);
+
+  /* table — sortable headers */
+  const hasMph = !!b.def.dist;
+  const dirLower = b.def.dir === "lower";
+  const nul = Symbol("null");
+  const keyFns = {
+    rank:  r => r.allRank,
+    name:  r => dispName(r.a, r.id).toLowerCase(),
+    grade: r => r.g.key === "Alum" ? 99 : (r.g.key === "?" ? 100 : Number(r.g.key)),
+    pr:    r => r.allRank,
+    mph:   r => { const m = mph(b.def, r.s.pr); return m === null ? nul : m; },
+    avg:   r => dirLower ? r.s.avg : -r.s.avg,
+    delta: r => r.s.delta === null ? nul : (dirLower ? -r.s.delta : r.s.delta),
+  };
+  const defaultAsc = { rank:true, name:true, grade:true, pr:true, mph:false, avg:true, delta:false };
+  const cols = [
+    { key:"rank",  label:"#" },
+    { key:"name",  label:"Athlete" },
+    { key:"grade", label:"Gr" },
+    { key:"pr",    label:"PR" },
+    hasMph ? { key:"mph", label:"MPH" } : null,
+    { key:"avg",   label:"Avg" },
+    { key:"delta", label:"Last Δ" },
+    { key:null,    label:"Trend" },
+  ].filter(Boolean);
+  if(!(ui.sort.key in keyFns)) ui.sort = { key:"rank", asc:true };
+  const fn = keyFns[ui.sort.key];
+  rows = rows.slice().sort((x,y) => {
+    const a = fn(x), c = fn(y);
+    if(a === nul && c === nul) return 0;
+    if(a === nul) return 1;               /* nulls always last */
+    if(c === nul) return -1;
+    const cmp = typeof a === "string" ? a.localeCompare(c) : a - c;
+    return ui.sort.asc ? cmp : -cmp;
+  });
+  const thead = el("thead"), trh = el("tr");
+  cols.forEach(col => {
+    const th = el("th", null, col.label + (col.key && ui.sort.key === col.key ? (ui.sort.asc ? " ▲" : " ▼") : ""));
+    if(col.key){
+      th.className = "sortable" + (ui.sort.key === col.key ? " sorted" : "");
+      th.title = col.key === "delta" ? "Click to rank by improvement vs. previous session" : "Click to sort";
+      th.addEventListener("click", () => {
+        if(ui.sort.key === col.key) ui.sort.asc = !ui.sort.asc;
+        else ui.sort = { key:col.key, asc:defaultAsc[col.key] };
+        renderTeam();
+      });
+    }
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh); tbl.appendChild(thead);
+  const tbody = el("tbody");
+  rows.forEach(r => {
+    const rank = ui.scope === "current" ? r.curRank : r.allRank;
+    const tr = el("tr", "rowbtn" + (rank <= 3 ? " top3" : ""));
+    tr.addEventListener("click", () => openAthlete(r.id));
+    const tdR = el("td", "rank", rank <= 3 ? ["🥇","🥈","🥉"][rank-1] : "#" + rank);
+    if(rank <= 3) tdR.classList.add("medal");
+    tr.appendChild(tdR);
+    const tdN = el("td", "name", dispName(r.a, r.id));
+    if(ui.scope === "all" && !r.g.current) tdN.appendChild(el("span", "tag", "Class of " + (r.a && r.a.grad ? r.a.grad : "?")));
+    tr.appendChild(tdN);
+    tr.appendChild(el("td", "muted", r.g.label));
+    tr.appendChild(el("td", null, fmtVal(r.s.pr, b.def)));
+    if(hasMph){ const m = mph(b.def, r.s.pr); tr.appendChild(el("td", "muted", m ? m.toFixed(1) : "—")); }
+    tr.appendChild(el("td", "muted", fmtVal(r.s.avg, b.def)));
+    const tdD = el("td");
+    const dl = fmtDelta(r.s.delta, r.s.improved, b.def);
+    tdD.appendChild(dl || el("span", "delta na", "—"));
+    tr.appendChild(tdD);
+    const tdS = el("td");
+    tdS.appendChild(sparkline(r.s.sessions, b.def));
+    tr.appendChild(tdS);
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+  if(!rows.length){
+    empty.style.display = "block";
+    empty.textContent = "Nobody matches that filter.";
+  }
+}
+
+/* ---------- ATHLETES view ---------- */
+function renderAthletes(){
+  if(ui.athlete){ renderAthleteDetail(ui.athlete); return; }
+  $("#athHome").style.display = ""; $("#athDetail").style.display = "none";
+  ui.athSport = facetChips($("#athSportChips"), "sport", "All sports", ui.athSport, k => { ui.athSport = k; render(); });
+  ui.athGender = facetChips($("#athGenderChips"), "gender", "Boys + Girls", ui.athGender, k => { ui.athGender = k; render(); });
+  chipRow($("#athGradeChips"), gradeChipItems(), ui.athGrade, k => { ui.athGrade = k; render(); });
+  const tbl = $("#athTable"), empty = $("#athEmpty");
+  clear(tbl);
+  let list = store.athletes.slice();
+  if(!list.length && store.rows.length){
+    list = [...new Set(store.rows.map(r => r.id))].map(id => ({ id, last:id, first:"", grad:null }));
+  }
+  if(ui.athGrade !== "All") list = list.filter(a => gradeOf(a).key === ui.athGrade);
+  if(ui.athSport !== "All") list = list.filter(a => (a.sport||"").toLowerCase() === ui.athSport.toLowerCase());
+  if(ui.athGender !== "All") list = list.filter(a => a.gender === ui.athGender);
+  const q = ui.athQ.trim().toLowerCase();
+  if(q) list = list.filter(a => (a.first + " " + a.last + " " + a.id).toLowerCase().includes(q));
+  list.sort((a,b) => (a.last + a.first).localeCompare(b.last + b.first));
+  if(!list.length){
+    empty.style.display = "block";
+    empty.textContent = store.athletes.length ? "Nobody matches that search." : "No roster yet — paste your Athletes tab under Data & Setup.";
+    return;
+  }
+  empty.style.display = "none";
+  const mets = metricsWithData();
+  const showSport = distinct("sport").length > 0 && list.some(a => a.sport);
+  const showGender = distinct("gender").length > 1;
+  const thead = el("thead"), trh = el("tr");
+  const heads = ["Athlete","Gr"];
+  if(showGender) heads.push("B/G");
+  if(showSport) heads.push("Sport");
+  heads.push("Tested on","Best event ranks");
+  heads.forEach(h => trh.appendChild(el("th", null, h)));
+  thead.appendChild(trh); tbl.appendChild(thead);
+  const tbody = el("tbody");
+  const boards = {}; mets.forEach(m => boards[m] = board(m, {}));
+  const poolBoards = new Map();
+  function boardFor(a, m){
+    const pool = {};
+    if(a && a.gender && distinct("gender").length > 1) pool.gender = a.gender;
+    if(a && a.sport && distinct("sport").length > 1) pool.sport = a.sport;
+    const key = m + "|" + (pool.gender||"") + "|" + (pool.sport||"");
+    if(!poolBoards.has(key)) poolBoards.set(key, board(m, pool));
+    return poolBoards.get(key);
+  }
+  list.forEach(a => {
+    const tr = el("tr", "rowbtn");
+    tr.addEventListener("click", () => openAthlete(a.id));
+    tr.appendChild(el("td", "name", dispName(a, a.id)));
+    tr.appendChild(el("td", "muted", gradeOf(a).label));
+    if(showGender) tr.appendChild(el("td", "muted", a.gender || "—"));
+    if(showSport) tr.appendChild(el("td", "muted", a.sport || "—"));
+    const tested = mets.filter(m => store.rows.some(r => r.id === a.id && r.metric.toLowerCase() === m.toLowerCase()));
+    tr.appendChild(el("td", "muted", tested.length ? tested.join(", ") : "—"));
+    const tdRk = el("td", "muted small");
+    const bits = [];
+    tested.forEach(m => {
+      const row = boardFor(a, m).rows.find(r => r.id === a.id);
+      if(row && row.curRank) bits.push(m + " #" + row.curRank);
+    });
+    tdRk.textContent = bits.join("  ·  ") || "—";
+    tr.appendChild(tdRk);
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+}
+
+function openAthlete(id){
+  ui.athlete = id; ui.view = "athletes";
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.v === "athletes"));
+  render();
+  window.scrollTo(0, 0);
+}
+function renderAthleteDetail(id){
+  $("#athHome").style.display = "none";
+  const box = $("#athDetail"); box.style.display = ""; clear(box);
+  const a = athleteById(id), g = gradeOf(a);
+  const head = el("div", "ath-h");
+  const back = el("button", "backbtn", "← All athletes");
+  back.addEventListener("click", () => { ui.athlete = null; render(); });
+  head.appendChild(back);
+  head.appendChild(el("h2", null, dispName(a, id)));
+  const meta = [];
+  if(g.label !== "—") meta.push(g.label === "Alum" ? "Alumni" : g.label + "th grade");
+  if(a && a.grad) meta.push("Class of " + a.grad);
+  if(a && a.gender) meta.push(a.gender);
+  if(a && a.sport) meta.push(a.sport);
+  if(a && a.pos) meta.push(a.pos);
+  head.appendChild(el("span", "muted", meta.join(" · ")));
+  box.appendChild(head);
+
+  const mets = metricsWithData().filter(m => store.rows.some(r => r.id === id && r.metric.toLowerCase() === m.toLowerCase()));
+  if(!mets.length){ box.appendChild(el("div", "empty", "No results recorded for this athlete yet.")); return; }
+  const grid = el("div", "grid2");
+  const pool = {}, poolBits = [];
+  if(a && a.gender && distinct("gender").length > 1){ pool.gender = a.gender; poolBits.push(a.gender.toLowerCase()); }
+  if(a && a.sport && distinct("sport").length > 1){ pool.sport = a.sport; poolBits.push(a.sport); }
+  mets.forEach(m => {
+    const s = statsFor(id, m);
+    const b = board(m, pool);
+    const row = b.rows.find(r => r.id === id);
+    const card = el("div", "mcard");
+    const mh = el("div", "mhead");
+    mh.appendChild(el("h3", null, m));
+    const dl = fmtDelta(s.delta, s.improved, s.def);
+    if(dl){ const w = el("span", "small"); w.appendChild(dl); w.appendChild(el("span", "muted", " vs. prev session")); mh.appendChild(w); }
+    card.appendChild(mh);
+    const st = el("div", "mstats");
+    function ms(label, val, unit){
+      const d = el("div", "ms");
+      d.appendChild(el("div", "lb", label));
+      const v = el("div", "v", val);
+      if(unit) v.appendChild(el("span", "u", " " + unit));
+      st.appendChild(d); d.appendChild(v); st.appendChild(d);
+    }
+    ms("PR", fmtVal(s.pr, s.def), s.def.unit);
+    ms("Average", fmtVal(s.avg, s.def), s.def.unit);
+    const pm = mph(s.def, s.pr);
+    if(pm) ms("PR speed", pm.toFixed(1), "mph");
+    ms("Latest", fmtVal(s.latest.best, s.def), fmtDate(s.latest.date));
+    ms("Reps", String(s.reps), null);
+    card.appendChild(st);
+    if(row){
+      const rl = el("div", "ranksline");
+      const parts = [];
+      if(row.curRank) parts.push("Team #" + row.curRank + " of " + b.currentCount);
+      parts.push((row.g.key === "Alum" ? "Alumni" : row.g.label + "th grade") + " #" + row.gradeRank);
+      parts.push("All-time #" + row.allRank + " of " + b.rows.length);
+      rl.appendChild(el("b", null, parts.shift()));
+      rl.appendChild(document.createTextNode("  ·  " + parts.join("  ·  ") + (poolBits.length ? "  ·  ranked among " + poolBits.join(" ") : "")));
+      card.appendChild(rl);
+    }
+    card.appendChild(trendChart(s));
+    const det = el("details", "slog");
+    det.appendChild(el("summary", null, "Session log (" + s.sessions.length + ")"));
+    const t = el("table", "lb");
+    const th = el("tr"); ["Date","Best","Reps"].forEach(h => th.appendChild(el("th", null, h)));
+    t.appendChild(th);
+    [...s.sessions].reverse().forEach(sess => {
+      const tr = el("tr");
+      tr.appendChild(el("td", "muted", fmtDateLong(sess.date)));
+      tr.appendChild(el("td", null, fmtVal(sess.best, s.def)));
+      tr.appendChild(el("td", "muted", sess.reps.map(v => fmtVal(v, s.def)).join(", ")));
+      t.appendChild(tr);
+    });
+    det.appendChild(t);
+    card.appendChild(det);
+    grid.appendChild(card);
+  });
+  box.appendChild(grid);
+}
+
+/* ---------- RECORDS view ---------- */
+function renderRecords(){
+  chipRow($("#recScopeChips"), [{ key:"all", label:"All-time" }, { key:"current", label:"Current team" }], ui.recScope, k => { ui.recScope = k; render(); });
+  ui.recSport = facetChips($("#recSportChips"), "sport", "All sports", ui.recSport, k => { ui.recSport = k; render(); });
+  ui.recGender = facetChips($("#recGenderChips"), "gender", "Boys + Girls", ui.recGender, k => { ui.recGender = k; render(); });
+  const grid = $("#recGrid"), empty = $("#recEmpty");
+  clear(grid);
+  const mets = metricsWithData();
+  if(!mets.length){ empty.style.display = "block"; empty.textContent = "No data yet — paste your sheet under Data & Setup."; return; }
+  empty.style.display = "none";
+  mets.forEach(m => {
+    const b = board(m, { sport:ui.recSport, gender:ui.recGender });
+    let rows = b.rows;
+    if(ui.recScope === "current") rows = rows.filter(r => r.g.current);
+    rows = rows.slice(0, 10);
+    const card = el("div", "mcard");
+    card.appendChild(el("h3", null, m + (b.def.unit ? " (" + b.def.unit + ")" : "")));
+    const t = el("table", "lb");
+    const th = el("tr");
+    ["#","Athlete", ui.recScope === "current" ? "Gr" : "Class", "PR"].forEach(h => th.appendChild(el("th", null, h)));
+    if(b.def.dist) th.appendChild(el("th", null, "MPH"));
+    t.appendChild(th);
+    rows.forEach((r,i) => {
+      const tr = el("tr", "rowbtn" + (i < 3 ? " top3" : ""));
+      tr.addEventListener("click", () => openAthlete(r.id));
+      tr.appendChild(el("td", "rank", i < 3 ? ["🥇","🥈","🥉"][i] : "#" + (i+1)));
+      tr.appendChild(el("td", "name", dispName(r.a, r.id)));
+      tr.appendChild(el("td", "muted", ui.recScope === "current" ? r.g.label : (r.a && r.a.grad ? String(r.a.grad) : "—")));
+      tr.appendChild(el("td", null, fmtVal(r.s.pr, b.def)));
+      if(b.def.dist){ const mm = mph(b.def, r.s.pr); tr.appendChild(el("td", "muted", mm ? mm.toFixed(1) : "—")); }
+      t.appendChild(tr);
+    });
+    card.appendChild(t);
+    grid.appendChild(card);
+  });
+}
+
+/* ---------- DATA view ---------- */
+function renderData(){
+  const n = (x, one, many) => x.length ? "✓ " + x.length + " " + (x.length === 1 ? one : many) : null;
+  const sd = $("#stData"), sa = $("#stAth"), sm = $("#stMet");
+  const set = (node, txt) => { node.textContent = txt || "nothing yet"; node.className = txt ? "ok" : "no"; };
+  set(sd, n(store.rows, "row", "rows"));
+  set(sa, n(store.athletes, "athlete", "athletes"));
+  set(sm, n(store.metrics, "metric", "metrics"));
+  $("#setProg").value = store.settings.program || "";
+  $("#setSenior").value = store.settings.senior || seniorYear();
+  $("#setShort").checked = !!store.settings.short;
+  $("#lnkData").value = store.links.data || "";
+  $("#lnkAth").value = store.links.athletes || "";
+  $("#lnkMet").value = store.links.metrics || "";
+}
+
+/* ---------- shell ---------- */
+function renderHeader(){
+  $("#progName").textContent = store.settings.program || "Dashboard Engine";
+  let latest = 0; store.rows.forEach(r => { if(r.date > latest) latest = r.date; });
+  $("#asOf").textContent = store.rows.length
+    ? store.rows.length + " results · " + store.athletes.length + " athletes · data through " + fmtDateLong(latest)
+    : "No data loaded yet — open Data & Setup";
+}
+function render(){
+  renderHeader();
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
+  $("#view-" + ui.view).classList.add("on");
+  if(ui.view === "team") renderTeam();
+  else if(ui.view === "athletes") renderAthletes();
+  else if(ui.view === "records") renderRecords();
+  else renderData();
+}
+
+/* ---------- events ---------- */
+$("#tabs").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  ui.view = b.dataset.v;
+  if(ui.view !== "athletes") ui.athlete = null;
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
+  render();
+});
+$("#teamSearch").addEventListener("input", e => { ui.teamQ = e.target.value; renderTeam(); });
+$("#athSearch").addEventListener("input", e => { ui.athQ = e.target.value; ui.athlete = null; renderAthletes(); });
+
+function handlePaste(text){
+  const res = ingest(text);
+  const warn = $("#pasteWarn");
+  if(!res.ok){ warn.textContent = res.msg; return; }
+  saveStore();
+  const label = { data:"Data (results)", athletes:"Athletes (roster)", metrics:"Metrics" }[res.kind];
+  warn.textContent = "";
+  if(res.warns && res.warns.length){
+    const shown = res.warns.slice(0, 6);
+    warn.textContent = shown.join("\n") + (res.warns.length > 6 ? "\n…and " + (res.warns.length - 6) + " more." : "");
+  }
+  $("#pasteBox").value = "";
+  $("#pasteBox").placeholder = "✓ Recognized " + label + " — " + res.n + " rows loaded. Paste the next tab…";
+  render();
+}
+$("#pasteBox").addEventListener("paste", e => {
+  const text = (e.clipboardData || window.clipboardData).getData("text");
+  if(text){ e.preventDefault(); handlePaste(text); }
+});
+$("#pasteBox").addEventListener("input", e => {
+  const v = e.target.value;
+  if(v && v.indexOf("\n") > 0) handlePaste(v);
+});
+$("#loadSample").addEventListener("click", () => {
+  ingest(SAMPLE.athletes); ingest(SAMPLE.metrics); ingest(SAMPLE.data);
+  if(!store.settings.program) store.settings.program = "Sample: Josh S — Football Speed & Strength";
+  saveStore(); ui.metric = null; render();
+});
+$("#clearAll").addEventListener("click", () => {
+  store.rows = []; store.athletes = []; store.metrics = [];
+  store.settings.program = ""; saveStore(); ui.metric = null; ui.athlete = null; render();
+});
+["setProg","setSenior","setShort"].forEach(id => {
+  document.getElementById(id).addEventListener("change", () => {
+    store.settings.program = $("#setProg").value.trim();
+    store.settings.senior = Number($("#setSenior").value) || null;
+    store.settings.short = $("#setShort").checked;
+    saveStore(); renderHeader();
+  });
+});
+async function fetchCsv(url, tag){
+  if(!url) return null;
+  const r = await fetch(url, { redirect:"follow" });
+  if(!r.ok) throw new Error(tag + ": HTTP " + r.status);
+  const t = await r.text();  
+  const res = ingest(t);
+  if(!res.ok) throw new Error(tag + ": " + res.msg);
+  return res.n;
+}
+$("#fetchLinks").addEventListener("click", async () => {
+  store.links.data = $("#lnkData").value.trim();
+  store.links.athletes = $("#lnkAth").value.trim();
+  store.links.metrics = $("#lnkMet").value.trim();
+  saveStore();
+  await refreshFromLinks(true);
+});
+async function refreshFromLinks(verbose){
+  const s = $("#fetchStatus");
+  const any = store.links.data || store.links.athletes || store.links.metrics;
+  if(!any){ if(verbose) s.textContent = "No links saved yet."; return; }
+  s.textContent = "Loading…";
+  try{
+    await fetchCsv(store.links.athletes, "Athletes");
+    await fetchCsv(store.links.metrics, "Metrics");
+    await fetchCsv(store.links.data, "Data");
+    saveStore();
+    s.textContent = "✓ Refreshed " + new Date().toLocaleTimeString();
+    render();
+  }catch(err){
+    s.textContent = "⚠ " + err.message + " — using the last saved data instead.";
+  }
+}
+
+/* ---------- boot ---------- */
+loadStore();
+render();
+refreshFromLinks(false);
+
+</script>
+</body>
+</html>
