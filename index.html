@@ -1235,6 +1235,13 @@ async function refreshFromLinks(verbose){
 
 /* ---------- boot ---------- */
 loadStore();
+if (!store.rows.length) {
+  ingest(SAMPLE.athletes);
+  ingest(SAMPLE.metrics);
+  ingest(SAMPLE.data);
+  store.settings.program = "Saints Football — Velocity & Strength";
+  saveStore();
+}
 render();
 refreshFromLinks(false);
 
