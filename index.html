@@ -1,312 +1,1094 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Saints Football — Velocity & Strength</title>
-  <style>
-    body {
-      margin: 0;
-      background: #0b172a;
-      color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      background: #070e1a;
-      border-bottom: 2px solid #1e293b;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .brand svg {
-      height: 46px;
-      width: 46px;
-      display: block;
-    }
-    .brand h1 {
-      margin: 0;
-      font-size: 1.25rem;
-      color: #fff;
-    }
-    .brand p {
-      margin: 0;
-      font-size: 0.8rem;
-      color: #d4af37;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    nav button {
-      background: #1e293b;
-      color: #cbd5e1;
-      border: 1px solid #334155;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    nav button.active {
-      background: #d4af37;
-      color: #000;
-      border-color: #d4af37;
-    }
-    main {
-      padding: 24px;
-      max-width: 1100px;
-      margin: auto;
-    }
-    .tab { display: none; }
-    .tab.active { display: block; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .card {
-      background: #111e33;
-      padding: 16px;
-      border-radius: 8px;
-      border: 1px solid #1e293b;
-    }
-    .card .val {
-      font-size: 1.6rem;
-      color: #d4af37;
-      font-weight: bold;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #111e33;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #1e293b;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-    th {
-      background: #070e1a;
-      color: #94a3b8;
-    }
-    textarea, input[type="text"] {
-      width: 100%;
-      background: #070e1a;
-      border: 1px solid #334155;
-      color: #fff;
-      padding: 10px;
-      border-radius: 6px;
-      box-sizing: border-box;
-      margin: 8px 0 16px;
-    }
-    .btn {
-      background: #d4af37;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saints Velocity &amp; Strength Engine</title>
+<style>
+:root{
+  color-scheme: light;
+  --surface:#f8fafc; --card:#ffffff; --line:#e2e8f0; --grid:#edf2f7;
+  --ink:#0a192f; --ink2:#475569; --ink3:#94a3b8;
+  --accent:#0047AB; /* Royal Blue */
+  --accent-soft:rgba(0,71,171,.10);
+  --good:#008300; --bad:#e34948;
+  --gold:#d4af37; /* Athletic Gold */
+  --gold-soft:rgba(212,175,55,.16);
+  --goldline:#b89628;
+  --chipbg:#f1f5f9;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --surface:#070e18; --card:#0f1c2e; --line:#1e293b; --grid:#17253b;
+    --ink:#f8fafc; --ink2:#94a3b8; --ink3:#64748b;
+    --accent:#1d68d8; /* Bright Royal */
+    --accent-soft:rgba(29,104,216,.20);
+    --good:#3fae3f; --bad:#e66767;
+    --gold:#d4af37;
+    --gold-soft:rgba(212,175,55,.18);
+    --goldline:#f5c518;
+    --chipbg:#1e293b;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface:#070e18; --card:#0f1c2e; --line:#1e293b; --grid:#17253b;
+  --ink:#f8fafc; --ink2:#94a3b8; --ink3:#64748b;
+  --accent:#1d68d8;
+  --accent-soft:rgba(29,104,216,.20);
+  --good:#3fae3f; --bad:#e66767;
+  --gold:#d4af37;
+  --gold-soft:rgba(212,175,55,.18);
+  --goldline:#f5c518;
+  --chipbg:#1e293b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface);color:var(--ink);
+  font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 20px 60px}
+
+/* Header & Brand with Fleur-de-lis */
+header.top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
+  padding:14px 0;border-bottom:2px solid var(--accent)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-logo{width:38px;height:38px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.brand h1{font-size:20px;margin:0;letter-spacing:.2px;font-weight:700}
+.brand .sub{color:var(--gold);font-size:12px;margin-top:2px;font-weight:600}
+
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
+nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink2);
+  padding:7px 14px;border-radius:18px;font:600 13px inherit;font-family:inherit;cursor:pointer;transition:all .15s ease}
+nav.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+nav.tabs button:hover:not(.on){background:var(--chipbg);border-color:var(--gold)}
+
+.view{display:none}.view.on{display:block}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink2);padding:5px 12px;
+  border-radius:15px;font:600 12px inherit;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all .15s ease}
+.chip.on{background:var(--gold);color:#000;border-color:var(--goldline);font-weight:700}
+.chip:hover:not(.on){background:var(--chipbg)}
+.search{flex:1;min-width:170px;max-width:290px;position:relative}
+.search input{width:100%;padding:7px 12px 7px 30px;border:1px solid var(--line);border-radius:16px;
+  background:var(--card);color:var(--ink);font:13px inherit;font-family:inherit}
+.search::before{content:"⌕";position:absolute;left:10px;top:5px;color:var(--ink3);font-size:15px}
+.spacer{flex:1}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;border-left:4px solid var(--accent)}
+.tile .lb{font:600 10.5px inherit;font-family:inherit;letter-spacing:.6px;color:var(--ink3);text-transform:uppercase}
+.tile .v{font-size:22px;font-weight:650;margin-top:2px;color:var(--ink)}
+.tile .v.hero{font-size:30px;color:var(--gold)}
+.tile .d{font-size:12px;color:var(--ink2);margin-top:1px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+table.lb{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.lb th{font:600 10.5px inherit;font-family:inherit;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--ink3);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:default}
+table.lb th.sortable{cursor:pointer;user-select:none}
+table.lb th.sortable:hover{color:var(--gold)}
+table.lb th.sorted{color:var(--accent)}
+table.lb td{padding:7px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
+table.lb tr.rowbtn{cursor:pointer}
+table.lb tr.rowbtn:hover td{background:var(--accent-soft)}
+table.lb tr.top3 td{background:var(--gold-soft)}
+table.lb tr.top3:hover td{background:var(--gold-soft);box-shadow:inset 0 0 0 99em rgba(0,71,171,.08)}
+.rank{font-weight:700}
+td.name{font-weight:600}
+.tag{display:inline-block;background:var(--chipbg);color:var(--ink2);font:600 11px inherit;font-family:inherit;
+  border-radius:9px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+.delta{font-weight:600}
+.delta.good{color:var(--good)}.delta.bad{color:var(--bad)}.delta.na{color:var(--ink3);font-weight:400}
+.muted{color:var(--ink2)}.small{font-size:12px}.tiny{font-size:11px;color:var(--ink3)}
+h2{font-size:16px;margin:18px 0 8px;color:var(--gold)}
+h3{font-size:14px;margin:0 0 6px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;border-top:3px solid var(--accent)}
+.mcard .mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.mstats{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 4px}
+.mstats .ms .lb{font:600 10px inherit;font-family:inherit;letter-spacing:.5px;color:var(--ink3);text-transform:uppercase}
+.mstats .ms .v{font-size:19px;font-weight:650;color:var(--gold)}
+.mstats .ms .v .u{font-size:12px;color:var(--ink2);font-weight:500}
+.ranksline{font-size:12px;color:var(--ink2);margin:2px 0 6px}
+.ranksline b{color:var(--accent)}
+.backbtn{border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:16px;
+  padding:6px 14px;font:600 12px inherit;font-family:inherit;cursor:pointer;margin-right:8px}
+.backbtn:hover{background:var(--chipbg);border-color:var(--gold)}
+.ath-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+.ath-h h2{margin:0;font-size:22px;color:var(--ink)}
+svg text{font-family:inherit}
+.chartbox{position:relative}
+.tooltip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);
+  border-radius:7px;padding:6px 9px;font-size:12px;opacity:0;transition:opacity .08s;z-index:5;
+  white-space:nowrap;transform:translate(-50%,-110%)}
+.tooltip .tv{font-weight:700;font-size:13px;color:var(--gold)}
+details.slog{margin-top:6px}
+details.slog summary{cursor:pointer;color:var(--ink2);font-size:12px}
+details.slog table{margin-top:6px;font-size:12px}
+.pastegrid{display:grid;grid-template-columns:1fr;gap:12px}
+textarea.paste{width:100%;min-height:130px;border:1.5px dashed var(--line);border-radius:10px;
+  background:var(--surface);color:var(--ink);font:12px ui-monospace,Consolas,monospace;padding:10px;resize:vertical}
+textarea.paste:focus{border-color:var(--gold);outline:none}
+.statusrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
+.st{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
+.st .ok{color:var(--good);font-weight:700}
+.st .no{color:var(--ink3)}
+.btn{border:0;background:var(--accent);color:#fff;padding:8px 16px;border-radius:18px;
+  font:600 13px inherit;font-family:inherit;cursor:pointer;transition:background .15s ease}
+.btn.ghost{background:var(--card);color:var(--ink2);border:1px solid var(--line)}
+.btn:hover{background:var(--gold);color:#000}
+.formrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.formrow label{font-size:13px;color:var(--ink2);min-width:170px}
+.formrow input[type=text],.formrow input[type=number],.formrow input[type=url]{
+  padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);
+  color:var(--ink);font:13px inherit;font-family:inherit;min-width:230px}
+.note{font-size:12px;color:var(--ink2);background:var(--chipbg);border-radius:8px;padding:8px 12px;margin:8px 0}
+.warnbox{font-size:12px;color:var(--bad);margin:6px 0;white-space:pre-line}
+.empty{padding:40px 20px;text-align:center;color:var(--ink2)}
+.medal{font-weight:800}
+@media (max-width:640px){ .tiles{grid-template-columns:repeat(2,1fr)} }
+</style>
 </head>
 <body>
-
-  <header>
+<div class="wrap">
+  <header class="top">
     <div class="brand">
-      <!-- Clean Saints Gold Fleur-de-lis -->
-      <svg viewBox="0 0 100 100">
-        <path d="M50 8C48 24 37 34 26 38C38 42 42 53 42 66C37 66 31 64 26 60C28 72 38 80 50 80C62 80 72 72 74 60C69 64 63 66 58 66C58 53 62 42 74 38C63 34 52 24 50 8Z" fill="#D4AF37"/>
-        <path d="M22 68C22 68 18 52 10 44C6 58 14 74 24 76C23 74 22 71 22 68Z" fill="#D4AF37"/>
-        <path d="M78 68C78 68 82 52 90 44C94 58 86 74 76 76C77 74 78 71 78 68Z" fill="#D4AF37"/>
-        <rect x="34" y="69" width="32" height="6" rx="3" fill="#0B172A" stroke="#D4AF37" stroke-width="2"/>
-        <path d="M46 75L42 88H58L54 75H46Z" fill="#D4AF37"/>
+      <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 6C47 22 36 32 25 36C37 40 41 51 41 64C36 64 30 62 25 58C27 70 37 78 50 78C63 78 73 70 75 58C70 62 64 64 59 64C59 51 63 40 75 36C64 32 53 22 50 6Z" fill="#D4AF37"/>
+        <path d="M50 10C48 22 41 29 32 32C40 35 43 45 43 55C39 55 34 53 30 50C32 60 40 66 50 66C60 66 68 60 70 50C66 53 61 55 57 55C57 45 60 35 68 32C59 29 52 22 50 10Z" fill="#0047AB"/>
+        <path d="M21 66C21 66 17 50 9 42C5 56 13 72 23 74C22 72 21 69 21 66Z" fill="#D4AF37"/>
+        <path d="M79 66C79 66 83 50 91 42C95 56 87 72 77 74C78 72 79 69 79 66Z" fill="#D4AF37"/>
+        <rect x="33" y="67" width="34" height="6" rx="3" fill="#0047AB" stroke="#D4AF37" stroke-width="2"/>
+        <path d="M46 73L42 86H58L54 73H46Z" fill="#D4AF37"/>
       </svg>
       <div>
-        <h1 id="progTitle">Saints Football — Velocity & Strength</h1>
-        <p>Nansemond-Suffolk Academy</p>
+        <h1 id="progName">Saints Velocity &amp; Strength</h1>
+        <div class="sub" id="asOf">Loading Google Sheet data…</div>
       </div>
     </div>
-    <nav>
-      <button class="navBtn active" data-target="tab1">Overview</button>
-      <button class="navBtn" data-target="tab2">Roster</button>
-      <button class="navBtn" data-target="tab3">Settings & Sync</button>
+    <nav class="tabs" id="tabs">
+      <button data-v="team" class="on">Team</button>
+      <button data-v="athletes">Athletes</button>
+      <button data-v="records">Records</button>
+      <button data-v="data">Data &amp; Setup</button>
     </nav>
   </header>
 
-  <main>
-    <div id="tab1" class="tab active">
-      <div class="grid">
-        <div class="card">
-          <small>ATHLETES</small>
-          <div class="val" id="cntAth">0</div>
-        </div>
-        <div class="card">
-          <small>DATA ROWS</small>
-          <div class="val" id="cntData">0</div>
-        </div>
+  <!-- TEAM -->
+  <section class="view on" id="view-team">
+    <div class="controls">
+      <div class="chips" id="metricChips"></div>
+    </div>
+    <div class="controls">
+      <div class="chips" id="sportChips"></div>
+      <div class="chips" id="genderChips"></div>
+      <div class="chips" id="gradeChips"></div>
+      <div class="chips" id="scopeChips"></div>
+      <div class="spacer"></div>
+      <div class="search"><input id="teamSearch" type="text" placeholder="Find an athlete…" autocomplete="off"></div>
+    </div>
+    <div class="tiles" id="teamTiles"></div>
+    <div class="card" style="padding:6px 10px;overflow-x:auto">
+      <table class="lb" id="lbTable"></table>
+      <div class="empty" id="teamEmpty" style="display:none"></div>
+    </div>
+  </section>
+
+  <!-- ATHLETES -->
+  <section class="view" id="view-athletes">
+    <div id="athHome">
+      <div class="controls">
+        <div class="chips" id="athSportChips"></div>
+        <div class="chips" id="athGenderChips"></div>
+        <div class="chips" id="athGradeChips"></div>
+        <div class="spacer"></div>
+        <div class="search"><input id="athSearch" type="text" placeholder="Find an athlete…" autocomplete="off"></div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Athlete</th>
-            <th>Metric</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody id="overviewBody">
-          <tr><td colspan="3" style="text-align:center; color:#94a3b8;">No data loaded. Use Settings & Sync.</td></tr>
-        </tbody>
-      </table>
+      <div class="card" style="padding:6px 10px;overflow-x:auto">
+        <table class="lb" id="athTable"></table>
+        <div class="empty" id="athEmpty" style="display:none"></div>
+      </div>
+    </div>
+    <div id="athDetail" style="display:none"></div>
+  </section>
+
+  <!-- RECORDS -->
+  <section class="view" id="view-records">
+    <div class="controls">
+      <div class="chips" id="recScopeChips"></div>
+      <div class="chips" id="recSportChips"></div>
+      <div class="chips" id="recGenderChips"></div>
+    </div>
+    <div class="grid2" id="recGrid"></div>
+    <div class="empty" id="recEmpty" style="display:none"></div>
+  </section>
+
+  <!-- DATA & SETUP -->
+  <section class="view" id="view-data">
+    <h2 style="margin-top:14px">Feed the dashboard</h2>
+    <div class="note">Open your Data Sheet, go to a tab, <b>select all (Ctrl+A), copy (Ctrl+C)</b>, click the box below, and <b>paste (Ctrl+V)</b>. The dashboard recognizes which tab you pasted by its headers. Paste all three tabs — any order. Re-pasting a tab replaces it.</div>
+    <div class="pastegrid">
+      <textarea class="paste" id="pasteBox" placeholder="Paste a tab from your Data Sheet here (Data, Athletes, or Metrics)…"></textarea>
+    </div>
+    <div class="warnbox" id="pasteWarn"></div>
+    <div class="statusrow">
+      <div class="st"><div class="lb tiny">DATA (results)</div><div id="stData" class="no">nothing yet</div></div>
+      <div class="st"><div class="lb tiny">ATHLETES (roster)</div><div id="stAth" class="no">nothing yet</div></div>
+      <div class="st"><div class="lb tiny">METRICS (definitions)</div><div id="stMet" class="no">nothing yet</div></div>
+    </div>
+    <div class="formrow">
+      <button class="btn ghost" id="loadSample">Load fallback sample (Fly 10s)</button>
+      <button class="btn ghost" id="clearAll">Clear everything</button>
     </div>
 
-    <div id="tab2" class="tab">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>#</th>
-            <th>Position</th>
-            <th>Grad</th>
-          </tr>
-        </thead>
-        <tbody id="rosterBody">
-          <tr><td colspan="4" style="text-align:center; color:#94a3b8;">No athletes listed.</td></tr>
-        </tbody>
-      </table>
+    <h2>Settings</h2>
+    <div class="card">
+      <div class="formrow"><label for="setProg">Program name</label><input type="text" id="setProg" placeholder="e.g. Saints Football"></div>
+      <div class="formrow"><label for="setSenior">Current senior class year</label><input type="number" id="setSenior" min="2000" max="2100" style="min-width:110px">
+        <span class="tiny">2027 = the 2026–27 school year. Grades and “current vs. alumni” come from this.</span></div>
+      <div class="formrow"><label for="setShort">Shorten names (First L.)</label><input type="checkbox" id="setShort">
+        <span class="tiny">Use when sharing the dashboard beyond the coaching staff.</span></div>
     </div>
 
-    <div id="tab3" class="tab">
-      <h3>Quick Ingestion (Paste from Sheet)</h3>
-      <textarea id="pasteBox" rows="4" placeholder="Paste data table here..."></textarea>
-      
-      <h3>Google Sheets Auto-Sync (CSV URLs)</h3>
-      <label>Athletes Sheet CSV</label>
-      <input type="text" id="urlAth" placeholder="https://docs.google.com/...output=csv">
-      <label>Data Sheet CSV</label>
-      <input type="text" id="urlData" placeholder="https://docs.google.com/...output=csv">
-      
-      <button class="btn" id="saveSync">Save & Sync Now</button>
-      <p id="syncMsg" style="color: #d4af37; margin-top: 10px;"></p>
+    <h2>Google Sheet Auto-Sync Links</h2>
+    <div class="card">
+      <div class="tiny" style="margin-bottom:8px">These links pull directly from your published Google Sheet tabs. Updates made to the Google Sheet reflect automatically when the page is opened or refreshed.</div>
+      <div class="formrow"><label for="lnkData">Data tab CSV link</label><input type="url" id="lnkData"></div>
+      <div class="formrow"><label for="lnkAth">Athletes tab CSV link</label><input type="url" id="lnkAth"></div>
+      <div class="formrow"><label for="lnkMet">Metrics tab CSV link</label><input type="url" id="lnkMet"></div>
+      <div class="formrow"><button class="btn" id="fetchLinks">Sync with Google Sheets Now</button><span class="tiny" id="fetchStatus"></span></div>
     </div>
-  </main>
+  </section>
+</div>
+<div class="tooltip" id="tip"></div>
 
-  <script>
-    var db = { athletes: [], data: [], urls: { ath: '', dat: '' } };
+<script>
+"use strict";
 
-    try {
-      var saved = localStorage.getItem("saints_v26");
-      if (saved) db = JSON.parse(saved);
-    } catch(e) {}
+const DEFAULT_LINKS = [
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJWnp3nLxqZrNqqP91luUPA_UIBgDLcZdTXhLRBMRBhjzRfFhh-PJCAHQPhPtDlULeNfxG3mS6tDBP/pub?gid=211445254&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJWnp3nLxqZrNqqP91luUPA_UIBgDLcZdTXhLRBMRBhjzRfFhh-PJCAHQPhPtDlULeNfxG3mS6tDBP/pub?gid=923401373&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJWnp3nLxqZrNqqP91luUPA_UIBgDLcZdTXhLRBMRBhjzRfFhh-PJCAHQPhPtDlULeNfxG3mS6tDBP/pub?gid=2101892713&single=true&output=csv"
+];
 
-    function renderUI() {
-      document.getElementById("cntAth").innerText = db.athletes.length;
-      document.getElementById("cntData").innerText = db.data.length;
+const MPH_PER_YPS = 2.0454545454545454;
 
-      var rBody = document.getElementById("rosterBody");
-      if (db.athletes.length) {
-        rBody.innerHTML = db.athletes.map(function(a) {
-          return "<tr><td>" + (a.Name||"") + "</td><td>" + (a["#"]||"") + "</td><td>" + (a.Position||"") + "</td><td>" + (a.Grad||"") + "</td></tr>";
-        }).join("");
-      }
+let store = { 
+  rows: [], 
+  athletes: [], 
+  metrics: [],
+  settings: { program: "Saints Velocity & Strength", senior: 2027, short: false },
+  links: { data: "", athletes: "", metrics: "" }
+};
 
-      var oBody = document.getElementById("overviewBody");
-      if (db.data.length) {
-        oBody.innerHTML = db.data.map(function(d) {
-          return "<tr><td>" + (d.Name||"") + "</td><td>" + (d.Metric||"") + "</td><td><b>" + (d.Value||"") + "</b></td></tr>";
-        }).join("");
-      }
+let mem = {};
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return mem[k]||null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
+function saveStore(){ lsSet("de_store", JSON.stringify(store)); }
+function loadStore(){
+  const raw = lsGet("de_store");
+  if(raw){ 
+    try{ 
+      const s = JSON.parse(raw); 
+      if(s) store = Object.assign(store, s); 
+    }catch(e){} 
+  }
+}
 
-      if (db.urls) {
-        document.getElementById("urlAth").value = db.urls.ath || "";
-        document.getElementById("urlData").value = db.urls.dat || "";
-      }
+/* ---------- parsing ---------- */
+function parseTable(text){
+  const t = text.replace(/\r\n?/g,"\n").trim();
+  if(!t) return [];
+  const delim = t.indexOf("\t") >= 0 ? "\t" : ",";
+  const out = []; let row = [], cell = "", inQ = false;
+  for(let i=0;i<t.length;i++){
+    const ch = t[i];
+    if(inQ){
+      if(ch === '"'){ if(t[i+1] === '"'){ cell += '"'; i++; } else inQ = false; }
+      else cell += ch;
+    } else if(ch === '"' && cell === ""){ inQ = true; }
+    else if(ch === delim){ row.push(cell); cell = ""; }
+    else if(ch === "\n"){ row.push(cell); out.push(row); row = []; cell = ""; }
+    else cell += ch;
+  }
+  row.push(cell); out.push(row);
+  return out.filter(r => r.some(c => String(c).trim() !== ""));
+}
+function normHead(h){ return String(h||"").toLowerCase().replace(/[^a-z]/g,""); }
+function parseDate(s){
+  s = String(s).trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return Date.UTC(+m[1], +m[2]-1, +m[3]);
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if(m){ let y = +m[3]; if(y < 100) y += 2000; return Date.UTC(y, +m[1]-1, +m[2]); }
+  const n = Number(s);
+  if(isFinite(n) && n > 20000 && n < 80000) return Date.UTC(1899,11,30) + n*86400000;
+  const d = new Date(s); return isNaN(d) ? null : Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+}
+function fmtDate(ms){ const d = new Date(ms);
+  return (d.getUTCMonth()+1)+"/"+d.getUTCDate()+"/"+String(d.getUTCFullYear()).slice(2); }
+function fmtDateLong(ms){ const d = new Date(ms);
+  return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()]+" "+d.getUTCDate()+", "+d.getUTCFullYear(); }
+
+function classify(head){
+  const h = head.map(normHead);
+  if(h.includes("athleteid") && h.includes("value")) return "data";
+  if(h.includes("athleteid") && (h.includes("gradyear") || h.includes("lastname"))) return "athletes";
+  if(h.includes("metric") && (h.some(x=>x.startsWith("direction")) || h.includes("unit"))) return "metrics";
+  return null;
+}
+
+function ingest(text){
+  const rows = parseTable(text);
+  if(!rows.length) return { ok:false, msg:"Nothing to read." };
+  const kind = classify(rows[0]);
+  if(!kind) return { ok:false, msg:"Unrecognized table format." };
+  const h = rows[0].map(normHead);
+  const idx = names => { for(const n of names){ const i = h.findIndex(x => x === n || x.startsWith(n)); if(i >= 0) return i; } return -1; };
+  const body = rows.slice(1);
+  const warns = [];
+  if(kind === "data"){
+    const iD = idx(["date"]), iI = idx(["athleteid"]), iM = idx(["metric"]), iR = idx(["rep"]), iV = idx(["value"]), iN = idx(["notes"]);
+    const out = [];
+    body.forEach((r,k) => {
+      const vRaw = String(r[iV] ?? "").trim();
+      if(vRaw === "") return;
+      const v = Number(vRaw.replace(/[^0-9.\-]/g,""));
+      const dte = parseDate(r[iD]);
+      const id = String(r[iI]||"").trim().toLowerCase();
+      const met = String(r[iM]||"").trim();
+      if(!isFinite(v) || v === 0 || !id || !met || dte === null) return;
+      out.push({ date:dte, id, metric:met, rep:String(r[iR]||"").trim(), value:v, notes:String(iN>=0?(r[iN]||""):"") });
+    });
+    store.rows = out;
+    return { ok:true, kind, n:out.length, warns };
+  }
+  if(kind === "athletes"){
+    const iI = idx(["athleteid"]), iL = idx(["lastname"]), iF = idx(["firstname"]), iG = idx(["gradyear"]), iP = idx(["position"]), iGn = idx(["gender"]), iS = idx(["sport"]);
+    const out = [];
+    body.forEach(r => {
+      const id = String(r[iI]||"").trim().toLowerCase(); if(!id) return;
+      out.push({ id, last:String(r[iL]||"").trim(), first:String(r[iF]||"").trim(),
+        grad:Number(r[iG]) || null, pos:String(iP>=0?(r[iP]||""):"").trim(),
+        gender:normGender(iGn>=0?(r[iGn]||""):""), sport:String(iS>=0?(r[iS]||""):"").trim() });
+    });
+    store.athletes = out;
+    return { ok:true, kind, n:out.length, warns };
+  }
+  const iM = idx(["metric"]), iU = idx(["unit"]), iDr = idx(["direction"]), iDs = idx(["distance"]), iMin = idx(["typicalmin"]), iMax = idx(["typicalmax"]);
+  const out = [];
+  body.forEach(r => {
+    const name = String(r[iM]||"").trim(); if(!name) return;
+    out.push({ name, unit:String(r[iU]||"").trim(),
+      dir:/high/i.test(String(r[iDr]||"")) ? "higher" : "lower",
+      dist:Number(r[iDs]) || null, min:Number(r[iMin]) || null, max:Number(r[iMax]) || null });
+  });
+  store.metrics = out;
+  return { ok:true, kind, n:out.length, warns };
+}
+
+/* ---------- derived model ---------- */
+function normGender(v){
+  v = String(v).trim();
+  if(/^(b|m)/i.test(v)) return "Boys";
+  if(/^(g|f|w)/i.test(v)) return "Girls";
+  return "";
+}
+function distinct(field){
+  const set = new Set();
+  store.athletes.forEach(a => { if(a[field]) set.add(a[field]); });
+  return [...set].sort();
+}
+function poolMatch(a, pool){
+  if(pool && pool.gender && pool.gender !== "All"){ if(!a || a.gender !== pool.gender) return false; }
+  if(pool && pool.sport && pool.sport !== "All"){ if(!a || a.sport.toLowerCase() !== pool.sport.toLowerCase()) return false; }
+  return true;
+}
+function metricDef(name){
+  const m = store.metrics.find(x => x.name.toLowerCase() === name.toLowerCase());
+  if(m) return m;
+  return { name, unit:"", dir:"lower", dist:null, min:null, max:null };
+}
+function seniorYear(){
+  if(store.settings.senior) return store.settings.senior;
+  let latest = 0; store.rows.forEach(r => { if(r.date > latest) latest = r.date; });
+  if(!latest) return 2027;
+  const d = new Date(latest);
+  return d.getUTCFullYear() + (d.getUTCMonth() >= 6 ? 1 : 0);
+}
+function gradeOf(a){
+  if(!a || !a.grad) return { label:"—", current:false, key:"?" };
+  const sy = seniorYear(), g = 12 - (a.grad - sy);
+  if(g > 12) return { label:"Alum", current:false, key:"Alum" };
+  return { label:String(g), current:true, key:String(g) };
+}
+function athleteById(id){ return store.athletes.find(a => a.id === id) || null; }
+function dispName(a, id){
+  if(!a) return id;
+  if(store.settings.short) return a.first + " " + (a.last ? a.last[0] + "." : "");
+  return a.first + " " + a.last;
+}
+function metricsWithData(){
+  const seen = new Map();
+  store.rows.forEach(r => seen.set(r.metric.toLowerCase(), r.metric));
+  const order = store.metrics.map(m => m.name).filter(n => seen.has(n.toLowerCase()));
+  seen.forEach((orig, low) => { if(!order.some(n => n.toLowerCase() === low)) order.push(orig); });
+  return order;
+}
+function mph(def, v){ return (def.dist && v) ? def.dist * MPH_PER_YPS / v : null; }
+function better(def, a, b){ return def.dir === "lower" ? a < b : a > b; }
+
+function statsFor(id, metricName){
+  const def = metricDef(metricName);
+  const reps = store.rows.filter(r => r.id === id && r.metric.toLowerCase() === metricName.toLowerCase());
+  if(!reps.length) return null;
+  const byDate = new Map();
+  reps.forEach(r => {
+    const cur = byDate.get(r.date);
+    if(!cur){ byDate.set(r.date, { best:r.value, reps:[r.value] }); }
+    else { cur.reps.push(r.value); if(better(def, r.value, cur.best)) cur.best = r.value; }
+  });
+  const sessions = [...byDate.entries()].map(([date,s]) => ({ date, best:s.best, reps:s.reps }))
+    .sort((a,b) => a.date - b.date);
+  let pr = reps[0].value, sum = 0;
+  reps.forEach(r => { sum += r.value; if(better(def, r.value, pr)) pr = r.value; });
+  const latest = sessions[sessions.length-1];
+  const prev = sessions.length > 1 ? sessions[sessions.length-2] : null;
+  const delta = prev ? latest.best - prev.best : null;
+  const improved = delta === null ? null : (delta === 0 ? 0 : (better(def, latest.best, prev.best) ? 1 : -1));
+  return { def, reps:reps.length, pr, avg:sum/reps.length, sessions, latest, prev, delta, improved,
+    prDate:(() => { let d=null; for(const s of sessions){ if(s.best === pr){ d = s.date; break; } } return d; })() };
+}
+
+function board(metricName, pool){
+  const def = metricDef(metricName);
+  const ids = new Set();
+  store.rows.forEach(r => { if(r.metric.toLowerCase() === metricName.toLowerCase()) ids.add(r.id); });
+  const rows = [];
+  ids.forEach(id => {
+    const a = athleteById(id);
+    if(!poolMatch(a, pool)) return;
+    const s = statsFor(id, metricName); if(!s) return;
+    const g = gradeOf(a);
+    rows.push({ id, a, g, s });
+  });
+  rows.sort((x,y) => def.dir === "lower" ? x.s.pr - y.s.pr : y.s.pr - x.s.pr);
+  rows.forEach((r,i) => r.allRank = i + 1);
+  let c = 0; rows.forEach(r => { r.curRank = r.g.current ? ++c : null; });
+  const byGrade = {};
+  rows.forEach(r => { byGrade[r.g.key] = (byGrade[r.g.key]||0) + 1; r.gradeRank = byGrade[r.g.key]; });
+  return { def, rows, currentCount:c };
+}
+
+/* ================= rendering ================= */
+const $ = s => document.querySelector(s);
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text !== undefined && text !== null) e.textContent = text;
+  return e;
+}
+function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+
+const ui = { view:"team", metric:null, grade:"All", scope:"current", sport:"All", gender:"All",
+  recScope:"all", recSport:"All", recGender:"All",
+  teamQ:"", athQ:"", athGrade:"All", athSport:"All", athGender:"All",
+  athlete:null, sort:{ key:"rank", asc:true } };
+
+function fmtVal(v, def){
+  if(v === null || v === undefined) return "—";
+  if(Math.abs(v) < 10) return v.toFixed(3);
+  return Number(v.toFixed(Math.abs(v) < 100 ? 1 : 0)).toString();
+}
+function fmtDelta(delta, improved, def){
+  if(delta === null) return null;
+  const span = el("span", "delta " + (improved > 0 ? "good" : improved < 0 ? "bad" : "na"));
+  const arrow = improved > 0 ? "▲" : improved < 0 ? "▼" : "–";
+  span.textContent = arrow + " " + (delta > 0 ? "+" : "") + fmtVal(delta, def);
+  return span;
+}
+
+const NS = "http://www.w3.org/2000/svg";
+function sv(tag, attrs){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function sparkline(sessions, def){
+  const W = 96, H = 26, P = 3;
+  const svg = sv("svg", { width:W, height:H, viewBox:`0 0 ${W} ${H}` });
+  if(sessions.length < 2){
+    const c = sv("circle", { cx:W/2, cy:H/2, r:3, fill:"var(--accent)" });
+    svg.appendChild(c); return svg;
+  }
+  const vals = sessions.map(s => s.best);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if(lo === hi){ lo -= 1; hi += 1; }
+  const x = i => P + i * (W - 2*P) / (sessions.length - 1);
+  const y = v => { const t = (v - lo) / (hi - lo); const yy = def.dir === "lower" ? t : 1 - t; return P + yy * (H - 2*P); };
+  const pts = sessions.map((s,i) => x(i) + "," + y(s.best)).join(" ");
+  svg.appendChild(sv("polyline", { points:pts, fill:"none", stroke:"var(--accent)", "stroke-width":2, "stroke-linecap":"round", "stroke-linejoin":"round" }));
+  const last = sessions.length - 1;
+  svg.appendChild(sv("circle", { cx:x(last), cy:y(vals[last]), r:3, fill:"var(--gold)", stroke:"var(--card)", "stroke-width":1.5 }));
+  return svg;
+}
+
+function trendChart(stats){
+  const sessions = stats.sessions, def = stats.def;
+  const W = 640, H = 210, L = 48, R = 26, T = 14, B = 30;
+  const box = el("div", "chartbox");
+  const svg = sv("svg", { viewBox:`0 0 ${W} ${H}`, style:"width:100%;height:auto;display:block" });
+  box.appendChild(svg);
+  const allVals = [];
+  sessions.forEach(s => allVals.push(...s.reps));
+  let lo = Math.min(...allVals), hi = Math.max(...allVals);
+  if(lo === hi){ lo -= Math.abs(lo)*0.05 || 1; hi += Math.abs(hi)*0.05 || 1; }
+  const pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+  const n = sessions.length;
+  const x = i => n === 1 ? (L + (W-L-R)/2) : L + i * (W - L - R) / (n - 1);
+  const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+
+  for(let k = 0; k <= 3; k++){
+    const v = lo + (hi - lo) * k / 3, yy = y(v);
+    svg.appendChild(sv("line", { x1:L, x2:W-R, y1:yy, y2:yy, stroke:"var(--grid)", "stroke-width":1 }));
+    const t = sv("text", { x:L-6, y:yy+4, "text-anchor":"end", "font-size":11, fill:"var(--ink3)" });
+    t.textContent = fmtVal(v, def); svg.appendChild(t);
+  }
+  const step = Math.max(1, Math.ceil(n / 7));
+  sessions.forEach((s,i) => {
+    if(i % step === 0 || i === n-1){
+      const anchor = i === n-1 ? "end" : (i === 0 ? "start" : "middle");
+      const t = sv("text", { x:x(i) + (anchor==="end"?4:anchor==="start"?-4:0), y:H-8, "text-anchor":anchor, "font-size":11, fill:"var(--ink3)" });
+      t.textContent = fmtDate(s.date); svg.appendChild(t);
     }
+  });
+  sessions.forEach((s,i) => s.reps.forEach(v => {
+    svg.appendChild(sv("circle", { cx:x(i), cy:y(v), r:3.4, fill:"var(--accent)", opacity:0.32 }));
+  }));
+  if(n > 1){
+    svg.appendChild(sv("polyline", { points:sessions.map((s,i)=>x(i)+","+y(s.best)).join(" "),
+      fill:"none", stroke:"var(--accent)", "stroke-width":2, "stroke-linecap":"round", "stroke-linejoin":"round" }));
+  }
+  sessions.forEach((s,i) => {
+    const isPR = s.best === stats.pr;
+    svg.appendChild(sv("circle", { cx:x(i), cy:y(s.best), r:isPR?5:4, fill:isPR?"var(--gold)":"var(--accent)", stroke:"var(--card)", "stroke-width":2 }));
+    if(isPR){
+      const t = sv("text", { x:x(i), y:y(s.best)-9, "text-anchor":"middle", "font-size":11, "font-weight":700, fill:"var(--gold)" });
+      t.textContent = "PR " + fmtVal(s.best, def); svg.appendChild(t);
+    }
+  });
 
-    function parseCSV(txt) {
-      var lines = txt.trim().split("\n");
-      if (!lines.length) return [];
-      var delim = lines[0].indexOf("\t") > -1 ? "\t" : ",";
-      var heads = lines[0].split(delim).map(function(h){ return h.trim().replace(/^"|"$/g, ''); });
-      return lines.slice(1).map(function(l) {
-        var row = l.split(delim).map(function(c){ return c.trim().replace(/^"|"$/g, ''); });
-        var obj = {};
-        heads.forEach(function(h, i) { obj[h] = row[i] || ""; });
-        return obj;
+  const cross = sv("line", { x1:0, x2:0, y1:T, y2:H-B, stroke:"var(--ink3)", "stroke-width":1, opacity:0 });
+  svg.appendChild(cross);
+  const tip = $("#tip");
+  function showAt(clientX, clientY){
+    const rect = svg.getBoundingClientRect();
+    const sx = (clientX - rect.left) * W / rect.width;
+    let bi = 0, bd = 1e9;
+    for(let i=0;i<n;i++){ const d = Math.abs(x(i)-sx); if(d < bd){ bd = d; bi = i; } }
+    const s = sessions[bi];
+    cross.setAttribute("x1", x(bi)); cross.setAttribute("x2", x(bi)); cross.setAttribute("opacity", 0.5);
+    clear(tip);
+    tip.appendChild(el("div", "tv", fmtVal(s.best, def) + (def.unit ? " " + def.unit : "")));
+    const sub = el("div", null, fmtDateLong(s.date) + " · " + s.reps.length + (s.reps.length === 1 ? " rep" : " reps"));
+    tip.appendChild(sub);
+    if(s.reps.length > 1) tip.appendChild(el("div", null, "reps: " + s.reps.map(v=>fmtVal(v,def)).join(", ")));
+    const m = mph(def, s.best);
+    if(m) tip.appendChild(el("div", null, fmtVal(m,{}) . toString().slice(0,5) ? m.toFixed(1) + " mph" : ""));
+    tip.style.left = (rect.left + window.scrollX + x(bi) * rect.width / W) + "px";
+    tip.style.top = (rect.top + window.scrollY + y(s.best) * rect.height / H) + "px";
+    tip.style.opacity = 1;
+  }
+  svg.addEventListener("pointermove", e => showAt(e.clientX, e.clientY));
+  svg.addEventListener("pointerleave", () => { tip.style.opacity = 0; cross.setAttribute("opacity", 0); });
+  return box;
+}
+
+function chipRow(node, items, activeKey, onPick){
+  clear(node);
+  items.forEach(it => {
+    const b = el("button", "chip" + (it.key === activeKey ? " on" : ""), it.label);
+    b.addEventListener("click", () => onPick(it.key));
+    node.appendChild(b);
+  });
+}
+function facetChips(node, field, allLabel, activeKey, onPick){
+  const vals = distinct(field);
+  if(vals.length < 2){ clear(node); node.style.display = "none"; return "All"; }
+  node.style.display = "";
+  const items = [{ key:"All", label:allLabel }].concat(vals.map(v => ({ key:v, label:v })));
+  if(!items.some(i => i.key === activeKey)) activeKey = "All";
+  chipRow(node, items, activeKey, onPick);
+  return activeKey;
+}
+function gradeChipItems(){
+  const present = new Set();
+  store.athletes.forEach(a => present.add(gradeOf(a).key));
+  const items = [{ key:"All", label:"All grades" }];
+  ["9","10","11","12"].forEach(g => { if(present.has(g)) items.push({ key:g, label:g + "th" }); });
+  if(present.has("Alum")) items.push({ key:"Alum", label:"Alumni" });
+  return items;
+}
+
+function renderTeam(){
+  const mets = metricsWithData();
+  if(!ui.metric || !mets.some(m => m === ui.metric)) ui.metric = mets[0] || null;
+  chipRow($("#metricChips"), mets.map(m => ({ key:m, label:m })), ui.metric, k => { ui.metric = k; render(); });
+  ui.sport = facetChips($("#sportChips"), "sport", "All sports", ui.sport, k => { ui.sport = k; render(); });
+  ui.gender = facetChips($("#genderChips"), "gender", "Boys + Girls", ui.gender, k => { ui.gender = k; render(); });
+  chipRow($("#gradeChips"), gradeChipItems(), ui.grade, k => { ui.grade = k; render(); });
+  chipRow($("#scopeChips"), [{ key:"current", label:"Current team" }, { key:"all", label:"All-time (incl. alumni)" }], ui.scope, k => { ui.scope = k; render(); });
+
+  const tiles = $("#teamTiles"), tbl = $("#lbTable"), empty = $("#teamEmpty");
+  clear(tiles); clear(tbl);
+  if(!store.rows.length || !ui.metric){
+    empty.style.display = "block";
+    empty.textContent = "Loading performance rows from Google Sheets…";
+    return;
+  }
+  empty.style.display = "none";
+  const b = board(ui.metric, { sport:ui.sport, gender:ui.gender });
+  let rows = b.rows;
+  if(ui.scope === "current") rows = rows.filter(r => r.g.current);
+  if(ui.grade !== "All") rows = rows.filter(r => r.g.key === ui.grade);
+  const q = ui.teamQ.trim().toLowerCase();
+  if(q) rows = rows.filter(r => (dispName(r.a, r.id) + " " + r.id).toLowerCase().includes(q));
+
+  const leader = rows[0];
+  const t1 = el("div", "tile");
+  t1.appendChild(el("div", "lb", (ui.scope === "current" ? "Fastest right now" : "All-time best") + (b.def.dir === "higher" ? " (best)" : "")));
+  if(leader){
+    t1.appendChild(el("div", "v hero", fmtVal(leader.s.pr, b.def) + (b.def.unit ? " " : "")));
+    const m = mph(b.def, leader.s.pr);
+    t1.appendChild(el("div", "d", dispName(leader.a, leader.id) + (m ? " · " + m.toFixed(1) + " mph" : "")));
+  } else t1.appendChild(el("div", "v", "—"));
+  tiles.appendChild(t1);
+
+  const avgAll = rows.length ? rows.reduce((s,r) => s + r.s.pr, 0) / rows.length : null;
+  const t2 = el("div", "tile");
+  t2.appendChild(el("div", "lb", "Average PR (this group)"));
+  t2.appendChild(el("div", "v", avgAll === null ? "—" : fmtVal(avgAll, b.def)));
+  t2.appendChild(el("div", "d", rows.length + " athletes"));
+  tiles.appendChild(t2);
+
+  let latest = 0; store.rows.forEach(r => { if(r.metric.toLowerCase() === ui.metric.toLowerCase() && r.date > latest) latest = r.date; });
+  const t3 = el("div", "tile");
+  t3.appendChild(el("div", "lb", "Last session"));
+  t3.appendChild(el("div", "v", latest ? fmtDate(latest) : "—"));
+  const nLatest = new Set(store.rows.filter(r => r.date === latest && r.metric.toLowerCase() === ui.metric.toLowerCase()).map(r => r.id)).size;
+  t3.appendChild(el("div", "d", nLatest ? nLatest + " athletes tested" : ""));
+  tiles.appendChild(t3);
+
+  const improvers = rows.filter(r => r.s.improved > 0).length;
+  const t4 = el("div", "tile");
+  t4.appendChild(el("div", "lb", "Improved last session"));
+  t4.appendChild(el("div", "v", rows.some(r => r.s.improved !== null) ? improvers + " of " + rows.filter(r => r.s.improved !== null).length : "—"));
+  t4.appendChild(el("div", "d", "vs. their previous session"));
+  tiles.appendChild(t4);
+
+  const hasMph = !!b.def.dist;
+  const dirLower = b.def.dir === "lower";
+  const nul = Symbol("null");
+  const keyFns = {
+    rank:  r => r.allRank,
+    name:  r => dispName(r.a, r.id).toLowerCase(),
+    grade: r => r.g.key === "Alum" ? 99 : (r.g.key === "?" ? 100 : Number(r.g.key)),
+    pr:    r => r.allRank,
+    mph:   r => { const m = mph(b.def, r.s.pr); return m === null ? nul : m; },
+    avg:   r => dirLower ? r.s.avg : -r.s.avg,
+    delta: r => r.s.delta === null ? nul : (dirLower ? -r.s.delta : r.s.delta),
+  };
+  const defaultAsc = { rank:true, name:true, grade:true, pr:true, mph:false, avg:true, delta:false };
+  const cols = [
+    { key:"rank",  label:"#" },
+    { key:"name",  label:"Athlete" },
+    { key:"grade", label:"Gr" },
+    { key:"pr",    label:"PR" },
+    hasMph ? { key:"mph", label:"MPH" } : null,
+    { key:"avg",   label:"Avg" },
+    { key:"delta", label:"Last Δ" },
+    { key:null,    label:"Trend" },
+  ].filter(Boolean);
+  if(!(ui.sort.key in keyFns)) ui.sort = { key:"rank", asc:true };
+  const fn = keyFns[ui.sort.key];
+  rows = rows.slice().sort((x,y) => {
+    const a = fn(x), c = fn(y);
+    if(a === nul && c === nul) return 0;
+    if(a === nul) return 1;
+    if(c === nul) return -1;
+    const cmp = typeof a === "string" ? a.localeCompare(c) : a - c;
+    return ui.sort.asc ? cmp : -cmp;
+  });
+  const thead = el("thead"), trh = el("tr");
+  cols.forEach(col => {
+    const th = el("th", null, col.label + (col.key && ui.sort.key === col.key ? (ui.sort.asc ? " ▲" : " ▼") : ""));
+    if(col.key){
+      th.className = "sortable" + (ui.sort.key === col.key ? " sorted" : "");
+      th.title = col.key === "delta" ? "Click to rank by improvement vs. previous session" : "Click to sort";
+      th.addEventListener("click", () => {
+        if(ui.sort.key === col.key) ui.sort.asc = !ui.sort.asc;
+        else ui.sort = { key:col.key, asc:defaultAsc[col.key] };
+        renderTeam();
       });
     }
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh); tbl.appendChild(thead);
+  const tbody = el("tbody");
+  rows.forEach(r => {
+    const rank = ui.scope === "current" ? r.curRank : r.allRank;
+    const tr = el("tr", "rowbtn" + (rank <= 3 ? " top3" : ""));
+    tr.addEventListener("click", () => openAthlete(r.id));
+    const tdR = el("td", "rank", rank <= 3 ? ["🥇","🥈","🥉"][rank-1] : "#" + rank);
+    if(rank <= 3) tdR.classList.add("medal");
+    tr.appendChild(tdR);
+    const tdN = el("td", "name", dispName(r.a, r.id));
+    if(ui.scope === "all" && !r.g.current) tdN.appendChild(el("span", "tag", "Class of " + (r.a && r.a.grad ? r.a.grad : "?")));
+    tr.appendChild(tdN);
+    tr.appendChild(el("td", "muted", r.g.label));
+    tr.appendChild(el("td", null, fmtVal(r.s.pr, b.def)));
+    if(hasMph){ const m = mph(b.def, r.s.pr); tr.appendChild(el("td", "muted", m ? m.toFixed(1) : "—")); }
+    tr.appendChild(el("td", "muted", fmtVal(r.s.avg, b.def)));
+    const tdD = el("td");
+    const dl = fmtDelta(r.s.delta, r.s.improved, b.def);
+    tdD.appendChild(dl || el("span", "delta na", "—"));
+    tr.appendChild(tdD);
+    const tdS = el("td");
+    tdS.appendChild(sparkline(r.s.sessions, b.def));
+    tr.appendChild(tdS);
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+  if(!rows.length){
+    empty.style.display = "block";
+    empty.textContent = "Nobody matches that filter.";
+  }
+}
 
-    async function syncURL(url) {
-      if (!url) return [];
-      var bust = (url.indexOf("?") > -1 ? "&" : "?") + "_t=" + Date.now();
-      var r = await fetch(url + bust);
-      var t = await r.text();
-      return parseCSV(t);
-    }
-
-    async function runSync() {
-      var msg = document.getElementById("syncMsg");
-      msg.innerText = "Syncing with Google Sheets...";
-      try {
-        if (db.urls.ath) db.athletes = await syncURL(db.urls.ath);
-        if (db.urls.dat) db.data = await syncURL(db.urls.dat);
-        localStorage.setItem("saints_v26", JSON.stringify(db));
-        msg.innerText = "✓ Synced successfully at " + new Date().toLocaleTimeString();
-        renderUI();
-      } catch(err) {
-        msg.innerText = "⚠ Sync failed: " + err.message;
-      }
-    }
-
-    // Tabs
-    var btns = document.querySelectorAll(".navBtn");
-    btns.forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        btns.forEach(function(b){ b.classList.remove("active"); });
-        document.querySelectorAll(".tab").forEach(function(t){ t.classList.remove("active"); });
-        btn.classList.add("active");
-        document.getElementById(btn.getAttribute("data-target")).classList.add("active");
-      });
+function renderAthletes(){
+  if(ui.athlete){ renderAthleteDetail(ui.athlete); return; }
+  $("#athHome").style.display = ""; $("#athDetail").style.display = "none";
+  ui.athSport = facetChips($("#athSportChips"), "sport", "All sports", ui.athSport, k => { ui.athSport = k; render(); });
+  ui.athGender = facetChips($("#athGenderChips"), "gender", "Boys + Girls", ui.athGender, k => { ui.athGender = k; render(); });
+  chipRow($("#athGradeChips"), gradeChipItems(), ui.athGrade, k => { ui.athGrade = k; render(); });
+  const tbl = $("#athTable"), empty = $("#athEmpty");
+  clear(tbl);
+  let list = store.athletes.slice();
+  if(!list.length && store.rows.length){
+    list = [...new Set(store.rows.map(r => r.id))].map(id => ({ id, last:id, first:"", grad:null }));
+  }
+  if(ui.athGrade !== "All") list = list.filter(a => gradeOf(a).key === ui.athGrade);
+  if(ui.athSport !== "All") list = list.filter(a => (a.sport||"").toLowerCase() === ui.athSport.toLowerCase());
+  if(ui.athGender !== "All") list = list.filter(a => a.gender === ui.athGender);
+  const q = ui.athQ.trim().toLowerCase();
+  if(q) list = list.filter(a => (a.first + " " + a.last + " " + a.id).toLowerCase().includes(q));
+  list.sort((a,b) => (a.last + a.first).localeCompare(b.last + b.first));
+  if(!list.length){
+    empty.style.display = "block";
+    empty.textContent = "Loading athletes roster…";
+    return;
+  }
+  empty.style.display = "none";
+  const mets = metricsWithData();
+  const showSport = distinct("sport").length > 0 && list.some(a => a.sport);
+  const showGender = distinct("gender").length > 1;
+  const thead = el("thead"), trh = el("tr");
+  const heads = ["Athlete","Gr"];
+  if(showGender) heads.push("B/G");
+  if(showSport) heads.push("Sport");
+  heads.push("Tested on","Best event ranks");
+  heads.forEach(h => trh.appendChild(el("th", null, h)));
+  thead.appendChild(trh); tbl.appendChild(thead);
+  const tbody = el("tbody");
+  const poolBoards = new Map();
+  function boardFor(a, m){
+    const pool = {};
+    if(a && a.gender && distinct("gender").length > 1) pool.gender = a.gender;
+    if(a && a.sport && distinct("sport").length > 1) pool.sport = a.sport;
+    const key = m + "|" + (pool.gender||"") + "|" + (pool.sport||"");
+    if(!poolBoards.has(key)) poolBoards.set(key, board(m, pool));
+    return poolBoards.get(key);
+  }
+  list.forEach(a => {
+    const tr = el("tr", "rowbtn");
+    tr.addEventListener("click", () => openAthlete(a.id));
+    tr.appendChild(el("td", "name", dispName(a, a.id)));
+    tr.appendChild(el("td", "muted", gradeOf(a).label));
+    if(showGender) tr.appendChild(el("td", "muted", a.gender || "—"));
+    if(showSport) tr.appendChild(el("td", "muted", a.sport || "—"));
+    const tested = mets.filter(m => store.rows.some(r => r.id === a.id && r.metric.toLowerCase() === m.toLowerCase()));
+    tr.appendChild(el("td", "muted", tested.length ? tested.join(", ") : "—"));
+    const tdRk = el("td", "muted small");
+    const bits = [];
+    tested.forEach(m => {
+      const row = boardFor(a, m).rows.find(r => r.id === a.id);
+      if(row && row.curRank) bits.push(m + " #" + row.curRank);
     });
+    tdRk.textContent = bits.join("  ·  ") || "—";
+    tr.appendChild(tdRk);
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+}
 
-    // Manual Paste
-    document.getElementById("pasteBox").addEventListener("paste", function(e) {
-      var text = (e.clipboardData || window.clipboardData).getData("text");
-      if (!text) return;
-      var parsed = parseCSV(text);
-      if (parsed.length) {
-        var keys = Object.keys(parsed[0]).join(" ").toLowerCase();
-        if (keys.indexOf("pos") > -1 || keys.indexOf("grad") > -1) {
-          db.athletes = parsed;
-        } else {
-          db.data = parsed;
-        }
-        localStorage.setItem("saints_v26", JSON.stringify(db));
-        renderUI();
-      }
-    });
+function openAthlete(id){
+  ui.athlete = id; ui.view = "athletes";
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.v === "athletes"));
+  render();
+  window.scrollTo(0, 0);
+}
 
-    // Save URLs
-    document.getElementById("saveSync").addEventListener("click", function() {
-      db.urls.ath = document.getElementById("urlAth").value.trim();
-      db.urls.dat = document.getElementById("urlData").value.trim();
-      localStorage.setItem("saints_v26", JSON.stringify(db));
-      runSync();
-    });
+function renderAthleteDetail(id){
+  $("#athHome").style.display = "none";
+  const box = $("#athDetail"); box.style.display = ""; clear(box);
+  const a = athleteById(id), g = gradeOf(a);
+  const head = el("div", "ath-h");
+  const back = el("button", "backbtn", "← All athletes");
+  back.addEventListener("click", () => { ui.athlete = null; render(); });
+  head.appendChild(back);
+  head.appendChild(el("h2", null, dispName(a, id)));
+  const meta = [];
+  if(g.label !== "—") meta.push(g.label === "Alum" ? "Alumni" : g.label + "th grade");
+  if(a && a.grad) meta.push("Class of " + a.grad);
+  if(a && a.gender) meta.push(a.gender);
+  if(a && a.sport) meta.push(a.sport);
+  if(a && a.pos) meta.push(a.pos);
+  head.appendChild(el("span", "muted", meta.join(" · ")));
+  box.appendChild(head);
 
-    // Run on boot
-    renderUI();
-    if (db.urls && (db.urls.ath || db.urls.dat)) {
-      runSync();
+  const mets = metricsWithData().filter(m => store.rows.some(r => r.id === id && r.metric.toLowerCase() === m.toLowerCase()));
+  if(!mets.length){ box.appendChild(el("div", "empty", "No results recorded for this athlete yet.")); return; }
+  const grid = el("div", "grid2");
+  const pool = {}, poolBits = [];
+  if(a && a.gender && distinct("gender").length > 1){ pool.gender = a.gender; poolBits.push(a.gender.toLowerCase()); }
+  if(a && a.sport && distinct("sport").length > 1){ pool.sport = a.sport; poolBits.push(a.sport); }
+  mets.forEach(m => {
+    const s = statsFor(id, m);
+    const b = board(m, pool);
+    const row = b.rows.find(r => r.id === id);
+    const card = el("div", "mcard");
+    const mh = el("div", "mhead");
+    mh.appendChild(el("h3", null, m));
+    const dl = fmtDelta(s.delta, s.improved, s.def);
+    if(dl){ const w = el("span", "small"); w.appendChild(dl); w.appendChild(el("span", "muted", " vs. prev session")); mh.appendChild(w); }
+    card.appendChild(mh);
+    const st = el("div", "mstats");
+    function ms(label, val, unit){
+      const d = el("div", "ms");
+      d.appendChild(el("div", "lb", label));
+      const v = el("div", "v", val);
+      if(unit) v.appendChild(el("span", "u", " " + unit));
+      st.appendChild(d); d.appendChild(v); st.appendChild(d);
     }
-  </script>
+    ms("PR", fmtVal(s.pr, s.def), s.def.unit);
+    ms("Average", fmtVal(s.avg, s.def), s.def.unit);
+    const pm = mph(s.def, s.pr);
+    if(pm) ms("PR speed", pm.toFixed(1), "mph");
+    ms("Latest", fmtVal(s.latest.best, s.def), fmtDate(s.latest.date));
+    ms("Reps", String(s.reps), null);
+    card.appendChild(st);
+    if(row){
+      const rl = el("div", "ranksline");
+      const parts = [];
+      if(row.curRank) parts.push("Team #" + row.curRank + " of " + b.currentCount);
+      parts.push((row.g.key === "Alum" ? "Alumni" : row.g.label + "th grade") + " #" + row.gradeRank);
+      parts.push("All-time #" + row.allRank + " of " + b.rows.length);
+      rl.appendChild(el("b", null, parts.shift()));
+      rl.appendChild(document.createTextNode("  ·  " + parts.join("  ·  ") + (poolBits.length ? "  ·  ranked among " + poolBits.join(" ") : "")));
+      card.appendChild(rl);
+    }
+    card.appendChild(trendChart(s));
+    const det = el("details", "slog");
+    det.appendChild(el("summary", null, "Session log (" + s.sessions.length + ")"));
+    const t = el("table", "lb");
+    const th = el("tr"); ["Date","Best","Reps"].forEach(h => th.appendChild(el("th", null, h)));
+    t.appendChild(th);
+    [...s.sessions].reverse().forEach(sess => {
+      const tr = el("tr");
+      tr.appendChild(el("td", "muted", fmtDateLong(sess.date)));
+      tr.appendChild(el("td", null, fmtVal(sess.best, s.def)));
+      tr.appendChild(el("td", "muted", sess.reps.map(v => fmtVal(v, s.def)).join(", ")));
+      t.appendChild(tr);
+    });
+    det.appendChild(t);
+    card.appendChild(det);
+    grid.appendChild(card);
+  });
+  box.appendChild(grid);
+}
+
+function renderRecords(){
+  chipRow($("#recScopeChips"), [{ key:"all", label:"All-time" }, { key:"current", label:"Current team" }], ui.recScope, k => { ui.recScope = k; render(); });
+  ui.recSport = facetChips($("#recSportChips"), "sport", "All sports", ui.recSport, k => { ui.recSport = k; render(); });
+  ui.recGender = facetChips($("#recGenderChips"), "gender", "Boys + Girls", ui.recGender, k => { ui.recGender = k; render(); });
+  const grid = $("#recGrid"), empty = $("#recEmpty");
+  clear(grid);
+  const mets = metricsWithData();
+  if(!mets.length){ empty.style.display = "block"; empty.textContent = "Loading records from Google Sheets…"; return; }
+  empty.style.display = "none";
+  mets.forEach(m => {
+    const b = board(m, { sport:ui.recSport, gender:ui.recGender });
+    let rows = b.rows;
+    if(ui.recScope === "current") rows = rows.filter(r => r.g.current);
+    rows = rows.slice(0, 10);
+    const card = el("div", "mcard");
+    card.appendChild(el("h3", null, m + (b.def.unit ? " (" + b.def.unit + ")" : "")));
+    const t = el("table", "lb");
+    const th = el("tr");
+    ["#","Athlete", ui.recScope === "current" ? "Gr" : "Class", "PR"].forEach(h => th.appendChild(el("th", null, h)));
+    if(b.def.dist) th.appendChild(el("th", null, "MPH"));
+    t.appendChild(th);
+    rows.forEach((r,i) => {
+      const tr = el("tr", "rowbtn" + (i < 3 ? " top3" : ""));
+      tr.addEventListener("click", () => openAthlete(r.id));
+      tr.appendChild(el("td", "rank", i < 3 ? ["🥇","🥈","🥉"][i] : "#" + (i+1)));
+      tr.appendChild(el("td", "name", dispName(r.a, r.id)));
+      tr.appendChild(el("td", "muted", ui.recScope === "current" ? r.g.label : (r.a && r.a.grad ? String(r.a.grad) : "—")));
+      tr.appendChild(el("td", null, fmtVal(r.s.pr, b.def)));
+      if(b.def.dist){ const mm = mph(b.def, r.s.pr); tr.appendChild(el("td", "muted", mm ? mm.toFixed(1) : "—")); }
+      t.appendChild(tr);
+    });
+    card.appendChild(t);
+    grid.appendChild(card);
+  });
+}
+
+function renderData(){
+  const n = (x, one, many) => x.length ? "✓ " + x.length + " " + (x.length === 1 ? one : many) : null;
+  const sd = $("#stData"), sa = $("#stAth"), sm = $("#stMet");
+  const set = (node, txt) => { node.textContent = txt || "nothing yet"; node.className = txt ? "ok" : "no"; };
+  set(sd, n(store.rows, "row", "rows"));
+  set(sa, n(store.athletes, "athlete", "athletes"));
+  set(sm, n(store.metrics, "metric", "metrics"));
+  $("#setProg").value = store.settings.program || "";
+  $("#setSenior").value = store.settings.senior || seniorYear();
+  $("#setShort").checked = !!store.settings.short;
+  $("#lnkData").value = store.links.data || "";
+  $("#lnkAth").value = store.links.athletes || "";
+  $("#lnkMet").value = store.links.metrics || "";
+}
+
+function renderHeader(){
+  $("#progName").textContent = store.settings.program || "Saints Velocity & Strength";
+  let latest = 0; store.rows.forEach(r => { if(r.date > latest) latest = r.date; });
+  $("#asOf").textContent = store.rows.length
+    ? store.rows.length + " results · " + store.athletes.length + " athletes · data through " + fmtDateLong(latest)
+    : "Syncing Google Sheets…";
+}
+
+function render(){
+  renderHeader();
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
+  $("#view-" + ui.view).classList.add("on");
+  if(ui.view === "team") renderTeam();
+  else if(ui.view === "athletes") renderAthletes();
+  else if(ui.view === "records") renderRecords();
+  else renderData();
+}
+
+/* ---------- events ---------- */
+$("#tabs").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  ui.view = b.dataset.v;
+  if(ui.view !== "athletes") ui.athlete = null;
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
+  render();
+});
+$("#teamSearch").addEventListener("input", e => { ui.teamQ = e.target.value; renderTeam(); });
+$("#athSearch").addEventListener("input", e => { ui.athQ = e.target.value; ui.athlete = null; renderAthletes(); });
+
+function handlePaste(text){
+  const res = ingest(text);
+  const warn = $("#pasteWarn");
+  if(!res.ok){ warn.textContent = res.msg; return; }
+  saveStore();
+  const label = { data:"Data (results)", athletes:"Athletes (roster)", metrics:"Metrics" }[res.kind];
+  warn.textContent = "";
+  if(res.warns && res.warns.length){
+    const shown = res.warns.slice(0, 6);
+    warn.textContent = shown.join("\n") + (res.warns.length > 6 ? "\n…and " + (res.warns.length - 6) + " more." : "");
+  }
+  $("#pasteBox").value = "";
+  $("#pasteBox").placeholder = "✓ Recognized " + label + " — " + res.n + " rows loaded. Paste the next tab…";
+  render();
+}
+$("#pasteBox").addEventListener("paste", e => {
+  const text = (e.clipboardData || window.clipboardData).getData("text");
+  if(text){ e.preventDefault(); handlePaste(text); }
+});
+$("#pasteBox").addEventListener("input", e => {
+  const v = e.target.value;
+  if(v && v.indexOf("\n") > 0) handlePaste(v);
+});
+$("#loadSample").addEventListener("click", () => {
+  ingest(SAMPLE.athletes); ingest(SAMPLE.metrics); ingest(SAMPLE.data);
+  if(!store.settings.program) store.settings.program = "Saints Velocity & Strength";
+  saveStore(); ui.metric = null; render();
+});
+$("#clearAll").addEventListener("click", () => {
+  store.rows = []; store.athletes = []; store.metrics = [];
+  store.settings.program = ""; saveStore(); ui.metric = null; ui.athlete = null; render();
+});
+["setProg","setSenior","setShort"].forEach(id => {
+  document.getElementById(id).addEventListener("change", () => {
+    store.settings.program = $("#setProg").value.trim();
+    store.settings.senior = Number($("#setSenior").value) || null;
+    store.settings.short = $("#setShort").checked;
+    saveStore(); renderHeader();
+  });
+});
+
+async function fetchCsv(url, tag){
+  if(!url) return null;
+  const buster = (url.indexOf("?") > -1 ? "&" : "?") + "_t=" + Date.now();
+  const r = await fetch(url + buster, { redirect:"follow" });
+  if(!r.ok) throw new Error(tag + ": HTTP " + r.status);
+  const t = await r.text();
+  const res = ingest(t);
+  if(!res.ok) throw new Error(tag + ": " + res.msg);
+  return res.kind;
+}
+
+async function refreshAllTabs(verbose){
+  const s = $("#fetchStatus");
+  if(s) s.textContent = "Syncing Google Sheets…";
+  
+  // Use either stored URLs or the default hardcoded URLs
+  const urls = [
+    store.links.data || DEFAULT_LINKS[0],
+    store.links.athletes || DEFAULT_LINKS[1],
+    store.links.metrics || DEFAULT_LINKS[2]
+  ];
+
+  try {
+    for(let i=0; i<urls.length; i++){
+      const kind = await fetchCsv(urls[i], "Tab " + (i+1));
+      if(kind === "data") store.links.data = urls[i];
+      else if(kind === "athletes") store.links.athletes = urls[i];
+      else if(kind === "metrics") store.links.metrics = urls[i];
+    }
+    saveStore();
+    if(s) s.textContent = "✓ Synced " + new Date().toLocaleTimeString();
+    render();
+  } catch(err) {
+    if(s) s.textContent = "⚠ " + err.message + " — using cached data.";
+    render();
+  }
+}
+
+$("#fetchLinks").addEventListener("click", async () => {
+  store.links.data = $("#lnkData").value.trim();
+  store.links.athletes = $("#lnkAth").value.trim();
+  store.links.metrics = $("#lnkMet").value.trim();
+  saveStore();
+  await refreshAllTabs(true);
+});
+
+/* ---------- boot ---------- */
+loadStore();
+render();
+refreshAllTabs(false);
+</script>
 </body>
 </html>
