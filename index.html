@@ -9,10 +9,10 @@
   color-scheme: light;
   --surface:#f8fafc; --card:#ffffff; --line:#e2e8f0; --grid:#edf2f7;
   --ink:#0a192f; --ink2:#475569; --ink3:#94a3b8;
-  --accent:#0047AB; /* Royal Blue */
+  --accent:#0047AB;
   --accent-soft:rgba(0,71,171,.10);
   --good:#008300; --bad:#e34948;
-  --gold:#d4af37; /* Athletic Gold */
+  --gold:#d4af37;
   --gold-soft:rgba(212,175,55,.16);
   --goldline:#b89628;
   --chipbg:#f1f5f9;
@@ -22,7 +22,7 @@
     color-scheme: dark;
     --surface:#070e18; --card:#0f1c2e; --line:#1e293b; --grid:#17253b;
     --ink:#f8fafc; --ink2:#94a3b8; --ink3:#64748b;
-    --accent:#1d68d8; /* Bright Royal */
+    --accent:#1d68d8;
     --accent-soft:rgba(29,104,216,.20);
     --good:#3fae3f; --bad:#e66767;
     --gold:#d4af37;
@@ -48,11 +48,10 @@ body{margin:0;background:var(--surface);color:var(--ink);
   font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
 .wrap{max-width:1180px;margin:0 auto;padding:16px 20px 60px}
 
-/* Header & Brand */
 header.top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
   padding:14px 0;border-bottom:2px solid var(--accent)}
 .brand{display:flex;align-items:center;gap:12px}
-.brand-logo{width:42px;height:42px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))}
+.brand-logo{width:44px;height:44px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))}
 .brand h1{font-size:20px;margin:0;letter-spacing:.2px;font-weight:700}
 .brand .sub{color:var(--gold);font-size:12px;margin-top:2px;font-weight:600}
 
@@ -153,30 +152,18 @@ textarea.paste:focus{border-color:var(--gold);outline:none}
 <body>
 <div class="wrap">
   <header class="top">
-<div class="brand">
-      <!-- Sharp Royal Blue & Gold Football Helmet Logo -->
-      <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-        <!-- Helmet Shell (Royal Blue) -->
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M48 14C28 14 14 28 14 48C14 62 22 72 34 76L38 66C32 64 26 56 26 48C26 34 36 24 48 24C62 24 74 34 76 48H86C84 28 68 14 48 14Z" fill="#0047AB"/>
         <path d="M48 14C68 14 84 28 86 48H76C74 34 62 24 48 24V14Z" fill="#1D68D8"/>
-        
-        <!-- Athletic Gold Crown Stripe -->
         <path d="M44 14.5C40 16 30 22 25 32L33 38C36 30 42 25 46 24L44 14.5Z" fill="#D4AF37"/>
         <path d="M46 14H52V24H46V14Z" fill="#F5C518"/>
-        
-        <!-- Ear Hole / Padding -->
         <circle cx="48" cy="56" r="6" fill="#070E18" stroke="#D4AF37" stroke-width="2.5"/>
-        
-        <!-- Facemask (Gold Bars) -->
-        <!-- Top brow bar -->
         <path d="M72 44H90V50H74L72 44Z" fill="#D4AF37"/>
-        <!-- Main jaw & chin cage -->
         <path d="M68 54H92V60H72L68 54Z" fill="#D4AF37"/>
         <path d="M64 64H88V70H66L64 64Z" fill="#D4AF37"/>
-        <!-- Vertical connector bars -->
         <rect x="84" y="44" width="5" height="34" rx="2.5" fill="#F5C518"/>
         <rect x="74" y="50" width="4.5" height="26" rx="2" fill="#F5C518"/>
-        <!-- Chin cup strap -->
         <path d="M48 68L66 74L64 78L46 72L48 68Z" fill="#FFFFFF"/>
       </svg>
       <div>
@@ -283,6 +270,32 @@ textarea.paste:focus{border-color:var(--gold);outline:none}
 <script>
 "use strict";
 
+const SAMPLE = {
+  data: `Date\tAthlete ID\tMetric\tRep\tValue\tNotes
+2026-08-26\tadams-james\tFly 10\t1\t1.037\t
+2026-08-26\tbarnes-charles\tFly 10\t1\t0.998\t
+2026-08-26\tbeale-colton\tFly 10\t1\t1.049\t
+2026-08-26\tcreekmore-eddie\tFly 10\t1\t1.210\t
+2026-08-26\tdorshimer-tyler\tFly 10\t1\t1.043\t
+2026-08-26\tgoodman-cole\tFly 10\t1\t1.026\t
+2026-08-26\tmitchell-sebastian\tFly 10\t1\t0.993\t
+2026-08-26\tshearin-kellan\tFly 10\t1\t1.023\t
+2026-08-26\tortell-david\tFly 10\t1\t1.073\t`,
+  athletes: `Athlete ID\tLast Name\tFirst Name\tGrad Year\tPosition\tNotes\tGender (Boys/Girls)\tSport
+adams-james\tAdams\tJames\t2027\t\t\tBoys\tFootball
+barnes-charles\tBarnes\tCharles\t2027\t\t\tBoys\tFootball
+beale-colton\tBeale\tColton\t2027\t\t\tBoys\tFootball
+creekmore-eddie\tCreekmore\tEddie\t2027\t\t\tBoys\tFootball
+dorshimer-tyler\tDorshimer\tTyler\t2027\t\t\tBoys\tFootball
+goodman-cole\tGoodman\tCole\t2027\t\t\tBoys\tFootball
+mitchell-sebastian\tMitchell\tSebastian\t2029\t\t\tBoys\tFootball
+shearin-kellan\tShearin\tKellan\t2029\t\t\tBoys\tFootball
+ortell-david\tOrtell\tDavid\t2028\t\t\tBoys\tFootball`,
+  metrics: `Metric\tUnit\tDirection (Lower/Higher is better)\tDistance (yards, sprints only)\tTypical Min\tTypical Max\tNotes
+Fly 10\tseconds\tLower\t10\t0.9\t1.6\tFlying 10-yard sprint
+Bench Press\tlbs\tHigher\t\t45\t405\t1-rep max`
+};
+
 const DEFAULT_LINKS = [
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJWnp3nLxqZrNqqP91luUPA_UIBgDLcZdTXhLRBMRBhjzRfFhh-PJCAHQPhPtDlULeNfxG3mS6tDBP/pub?gid=211445254&single=true&output=csv",
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJWnp3nLxqZrNqqP91luUPA_UIBgDLcZdTXhLRBMRBhjzRfFhh-PJCAHQPhPtDlULeNfxG3mS6tDBP/pub?gid=923401373&single=true&output=csv",
@@ -313,7 +326,6 @@ function loadStore(){
   }
 }
 
-/* ---------- parsing ---------- */
 function parseTable(text){
   const t = text.replace(/\r\n?/g,"\n").trim();
   if(!t) return [];
@@ -405,7 +417,6 @@ function ingest(text){
   return { ok:true, kind, n:out.length, warns };
 }
 
-/* ---------- derived model ---------- */
 function normGender(v){
   v = String(v).trim();
   if(/^(b|m)/i.test(v)) return "Boys";
@@ -498,7 +509,6 @@ function board(metricName, pool){
   return { def, rows, currentCount:c };
 }
 
-/* ================= rendering ================= */
 const $ = s => document.querySelector(s);
 function el(tag, cls, text){
   const e = document.createElement(tag);
@@ -690,7 +700,6 @@ function renderTeam(){
   const q = ui.teamQ.trim().toLowerCase();
   if(q) rows = rows.filter(r => (dispName(r.a, r.id) + " " + r.id).toLowerCase().includes(q));
 
-  // If viewing latest session, rank by that session's mark
   if(ui.scope === "recent"){
     rows = rows.slice().sort((x,y) => b.def.dir === "lower" ? x.s.latest.best - y.s.latest.best : y.s.latest.best - x.s.latest.best);
   }
@@ -799,7 +808,6 @@ function renderTeam(){
 
     tr.appendChild(el("td", "muted", r.g.label));
     
-    // Main Display Mark
     const activeVal = ui.scope === "recent" ? r.s.latest.best : r.s.pr;
     const tdMark = el("td", null, fmtVal(activeVal, b.def));
     if(ui.scope === "recent" && activeVal === r.s.pr){
@@ -807,7 +815,6 @@ function renderTeam(){
     }
     tr.appendChild(tdMark);
 
-    // If recent session, also show all-time PR in separate column
     if(ui.scope === "recent"){
       tr.appendChild(el("td", "muted", fmtVal(r.s.pr, b.def)));
     }
@@ -892,7 +899,7 @@ function renderAthletes(){
       const row = boardFor(a, m).rows.find(r => r.id === a.id);
       if(row && row.curRank) bits.push(m + " #" + row.curRank);
     });
-    tdRk.textContent = bits.join("  ·  ") || "—";
+    tdRk.textContent = bits.join(" · ") || "—";
     tr.appendChild(tdRk);
     tbody.appendChild(tr);
   });
@@ -962,7 +969,7 @@ function renderAthleteDetail(id){
       parts.push((row.g.key === "Alum" ? "Alumni" : row.g.label + "th grade") + " #" + row.gradeRank);
       parts.push("All-time #" + row.allRank + " of " + b.rows.length);
       rl.appendChild(el("b", null, parts.shift()));
-      rl.appendChild(document.createTextNode("  ·  " + parts.join("  ·  ") + (poolBits.length ? "  ·  ranked among " + poolBits.join(" ") : "")));
+      rl.appendChild(document.createTextNode(" · " + parts.join(" · ") + (poolBits.length ? " · ranked among " + poolBits.join(" ") : "")));
       card.appendChild(rl);
     }
     card.appendChild(trendChart(s));
@@ -1054,7 +1061,6 @@ function render(){
   else renderData();
 }
 
-/* ---------- events ---------- */
 $("#tabs").addEventListener("click", e => {
   const b = e.target.closest("button"); if(!b) return;
   ui.view = b.dataset.v;
