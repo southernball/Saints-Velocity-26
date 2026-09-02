@@ -48,11 +48,11 @@ body{margin:0;background:var(--surface);color:var(--ink);
   font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
 .wrap{max-width:1180px;margin:0 auto;padding:16px 20px 60px}
 
-/* Header & Brand with Fleur-de-lis */
+/* Header & Brand */
 header.top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
   padding:14px 0;border-bottom:2px solid var(--accent)}
 .brand{display:flex;align-items:center;gap:12px}
-.brand-logo{width:38px;height:38px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.brand-logo{width:42px;height:42px;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))}
 .brand h1{font-size:20px;margin:0;letter-spacing:.2px;font-weight:700}
 .brand .sub{color:var(--gold);font-size:12px;margin-top:2px;font-weight:600}
 
@@ -154,22 +154,16 @@ textarea.paste:focus{border-color:var(--gold);outline:none}
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <svg class="brand-logo" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 44px; height: 44px; flex-shrink: 0; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.35));">
-        <path d="M60 4C58 24 45 42 38 52C48 52 56 46 60 38C64 46 72 52 82 52C75 42 62 24 60 4Z" fill="#D4AF37" stroke="#0047AB" stroke-width="2"/>
-        <path d="M60 12C58 26 49 38 45 44C52 44 57 40 60 33C63 40 68 44 75 44C71 38 62 26 60 12Z" fill="#F5C518"/>
-        
-        <path d="M34 52C22 52 8 42 6 28C4 46 16 66 32 70C34 64 34 58 34 52Z" fill="#D4AF37" stroke="#0047AB" stroke-width="2"/>
-        <path d="M30 54C22 54 12 46 10 35C10 47 18 61 30 65C31 61 31 57 30 54Z" fill="#F5C518"/>
-
-        <path d="M86 52C98 52 112 42 114 28C116 46 104 66 88 70C86 64 86 58 86 52Z" fill="#D4AF37" stroke="#0047AB" stroke-width="2"/>
-        <path d="M90 54C98 54 108 46 110 35C110 47 102 61 90 65C89 61 89 57 90 54Z" fill="#F5C518"/>
-
-        <path d="M46 78C46 88 53 104 60 114C67 104 74 88 74 78C67 80 53 80 46 78Z" fill="#D4AF37" stroke="#0047AB" stroke-width="2"/>
-        <path d="M50 82C51 89 55 100 60 107C65 100 69 89 70 82C65 83 55 83 50 82Z" fill="#F5C518"/>
-
-        <rect x="24" y="66" width="72" height="11" rx="4" fill="#0047AB" stroke="#D4AF37" stroke-width="2.5"/>
-        <line x1="28" y1="71.5" x2="92" y2="71.5" stroke="#F5C518" stroke-width="2"/>
-      </svg>"/>
+      <svg class="brand-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 5 C47 22 36 34 26 40 C38 43 43 54 43 66 C37 66 31 63 26 58 C28 72 38 78 50 78 C62 78 72 72 74 58 C69 63 63 66 57 66 C57 54 62 43 74 40 C64 34 53 22 50 5 Z" fill="#D4AF37"/>
+        <path d="M50 11 C48 24 40 32 32 36 C40 38 44 47 44 57 C39 57 34 55 30 51 C32 62 40 68 50 68 C60 68 68 62 70 51 C66 55 61 57 56 57 C56 47 60 38 68 36 C60 32 52 24 50 11 Z" fill="#F5C518"/>
+        <path d="M21 66 C21 66 17 50 7 42 C3 56 12 72 23 74 C22 72 21 69 21 66 Z" fill="#D4AF37"/>
+        <path d="M19 63 C19 63 16 51 9 45 C6 55 12 67 20 69 Z" fill="#F5C518"/>
+        <path d="M79 66 C79 66 83 50 93 42 C97 56 88 72 77 74 C78 72 79 69 79 66 Z" fill="#D4AF37"/>
+        <path d="M81 63 C81 63 84 51 91 45 C94 55 88 67 80 69 Z" fill="#F5C518"/>
+        <rect x="30" y="67" width="40" height="7" rx="3.5" fill="#0047AB" stroke="#D4AF37" stroke-width="2"/>
+        <path d="M44 74 L40 88 H60 L56 74 Z" fill="#D4AF37"/>
+        <path d="M46 76 L43 85 H57 L54 76 Z" fill="#F5C518"/>
       </svg>
       <div>
         <h1 id="progName">Saints Velocity &amp; Strength</h1>
@@ -779,7 +773,7 @@ function renderAthletes(){
   if(ui.athlete){ renderAthleteDetail(ui.athlete); return; }
   $("#athHome").style.display = ""; $("#athDetail").style.display = "none";
   ui.athSport = facetChips($("#athSportChips"), "sport", "All sports", ui.athSport, k => { ui.athSport = k; render(); });
-  ui.athGender = facetChips($("#athGenderChips"), "gender", "Boys + Girls", ui.athGender, k => { ui.athGender = k; render(); });
+  ui.athGender = facetChips($("#athGenderChips"), "gender", "Boys + Girls", ui.gender, k => { ui.athGender = k; render(); });
   chipRow($("#athGradeChips"), gradeChipItems(), ui.athGrade, k => { ui.athGrade = k; render(); });
   const tbl = $("#athTable"), empty = $("#athEmpty");
   clear(tbl);
@@ -1063,7 +1057,6 @@ async function refreshAllTabs(verbose){
   const s = $("#fetchStatus");
   if(s) s.textContent = "Syncing Google Sheets…";
   
-  // Use either stored URLs or the default hardcoded URLs
   const urls = [
     store.links.data || DEFAULT_LINKS[0],
     store.links.athletes || DEFAULT_LINKS[1],
