@@ -14,14 +14,13 @@
       --navy: #002d62;
       --text-main: #f1f5f9;
       --text-muted: #94a3b8;
-      --accent-hover: #1e3a66;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
@@ -32,11 +31,10 @@
       flex-direction: column;
     }
 
-    /* Fixed Crisp Logo Header */
     header {
       background-color: var(--panel-dark);
       border-bottom: 2px solid var(--panel-border);
-      padding: 12px 24px;
+      padding: 14px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -47,10 +45,9 @@
     .brand-wrap {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
     }
 
-    /* SVG/IMG Scaled Proportions */
     .logo-container {
       height: 48px;
       width: 48px;
@@ -60,12 +57,11 @@
       flex-shrink: 0;
     }
 
-    .logo-container svg,
-    .logo-container img {
+    .logo-container svg {
       height: 100%;
-      width: auto;
+      width: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.6));
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
     }
 
     .titles h1 {
@@ -76,7 +72,7 @@
     }
 
     .titles .sub {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: var(--gold);
       font-weight: 600;
       text-transform: uppercase;
@@ -97,7 +93,7 @@
       font-weight: 600;
       font-size: 0.85rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background 0.2s ease, color 0.2s ease;
     }
 
     nav button:hover {
@@ -127,10 +123,9 @@
       display: block;
     }
 
-    /* Cards & Grids */
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -156,7 +151,6 @@
       color: var(--gold);
     }
 
-    /* Tables */
     .table-container {
       background: var(--panel-dark);
       border: 1px solid var(--panel-border);
@@ -192,11 +186,6 @@
       border-bottom: none;
     }
 
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    /* Settings & Ingest Box */
     .settings-panel {
       background: var(--panel-dark);
       border: 1px solid var(--panel-border);
@@ -207,37 +196,40 @@
     }
 
     .settings-panel h2 {
-      font-size: 1.2rem;
-      margin-bottom: 12px;
+      font-size: 1.15rem;
+      margin: 20px 0 10px;
       color: var(--gold);
       border-bottom: 1px solid var(--panel-border);
-      padding-bottom: 8px;
+      padding-bottom: 6px;
+    }
+
+    .settings-panel h2:first-child {
+      margin-top: 0;
     }
 
     .settings-panel p {
       font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       line-height: 1.4;
     }
 
     textarea#pasteBox {
       width: 100%;
-      height: 110px;
+      height: 90px;
       background: #070e18;
       border: 1px solid var(--panel-border);
       border-radius: 6px;
       color: #fff;
-      padding: 12px;
+      padding: 10px;
       font-size: 0.85rem;
-      resize: vertical;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .status-badges {
       display: flex;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       flex-wrap: wrap;
     }
 
@@ -264,7 +256,7 @@
     .btn-row {
       display: flex;
       gap: 10px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .btn {
@@ -283,7 +275,7 @@
     }
 
     .field-row {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .field-row label {
@@ -299,3 +291,183 @@
       width: 100%;
       background: #070e18;
       border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      color: #fff;
+      padding: 8px 12px;
+    }
+
+    .status-line {
+      font-size: 0.82rem;
+      color: var(--gold);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-wrap">
+      <div class="logo-container">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 8C48 24 37 34 26 38C38 42 42 53 42 66C37 66 31 64 26 60C28 72 38 80 50 80C62 80 72 72 74 60C69 64 63 66 58 66C58 53 62 42 74 38C63 34 52 24 50 8Z" fill="#D4AF37"/>
+          <path d="M50 8C49 20 42 28 32 32C41 35 44 45 44 56C40 56 35 54 31 51C33 61 41 68 50 68C59 68 67 61 69 51C65 54 60 56 56 56C56 45 59 35 68 32C58 28 51 20 50 8Z" fill="#FFE57F"/>
+          <path d="M22 68C22 68 18 52 10 44C6 58 14 74 24 76C23 74 22 71 22 68Z" fill="#D4AF37"/>
+          <path d="M78 68C78 68 82 52 90 44C94 58 86 74 76 76C77 74 78 71 78 68Z" fill="#D4AF37"/>
+          <rect x="34" y="69" width="32" height="6" rx="3" fill="#1B2E4B" stroke="#D4AF37" stroke-width="2"/>
+          <path d="M46 75L42 88H58L54 75H46Z" fill="#D4AF37"/>
+        </svg>
+      </div>
+      <div class="titles">
+        <h1 id="hdrTitle">Saints Football — Velocity &amp; Strength</h1>
+        <div id="hdrSub" class="sub">NSA Saints High School Football</div>
+      </div>
+    </div>
+    <nav>
+      <button type="button" class="nav-btn active" data-tab="tab-overview">Overview</button>
+      <button type="button" class="nav-btn" data-tab="tab-leaderboard">Leaderboard</button>
+      <button type="button" class="nav-btn" data-tab="tab-roster">Roster</button>
+      <button type="button" class="nav-btn" data-tab="tab-settings">Settings &amp; Data</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-overview" class="tab-section active">
+      <div class="card-grid">
+        <div class="stat-card">
+          <div class="label">Athletes Tracked</div>
+          <div class="val" id="statAthletes">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Records</div>
+          <div class="val" id="statRows">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Metrics Loaded</div>
+          <div class="val" id="statMetrics">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Top Performer</div>
+          <div class="val" id="statLeader" style="font-size: 1.1rem; padding-top: 6px;">—</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="overviewTable">
+          <thead>
+            <tr>
+              <th>Athlete</th>
+              <th>Position</th>
+              <th>Year</th>
+              <th>Recent Metric</th>
+              <th>Best Recorded</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" style="text-align:center; color:#94a3b8;">No data loaded. Use the Settings &amp; Data tab to paste or load samples.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-leaderboard" class="tab-section">
+      <div class="table-container">
+        <table id="leaderTable">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Athlete</th>
+              <th>Metric</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" style="text-align:center; color:#94a3b8;">No metric selected.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-roster" class="tab-section">
+      <div class="table-container">
+        <table id="rosterTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Jersey #</th>
+              <th>Position</th>
+              <th>Grad Year</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" style="text-align:center; color:#94a3b8;">No roster data available.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-settings" class="tab-section">
+      <div class="settings-panel">
+        <h2>Feed the Dashboard</h2>
+        <p>Open your Data Sheet, go to a tab, <b>select all (Ctrl+A), copy (Ctrl+C)</b>, click below, and <b>paste (Ctrl+V)</b>. The dashboard recognizes tabs by their headers.</p>
+        
+        <textarea id="pasteBox" placeholder="Paste copied tab here..."></textarea>
+        
+        <div class="status-badges">
+          <div class="badge">
+            <div class="name">DATA (results)</div>
+            <div class="state" id="stData">nothing yet</div>
+          </div>
+          <div class="badge">
+            <div class="name">ATHLETES (roster)</div>
+            <div class="state" id="stAth">nothing yet</div>
+          </div>
+          <div class="badge">
+            <div class="name">METRICS</div>
+            <div class="state" id="stMet">nothing yet</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn" id="loadSample">Load Sample Data</button>
+          <button type="button" class="btn btn-secondary" id="clearAll">Clear All Data</button>
+        </div>
+
+        <h2>Configuration</h2>
+        <div class="field-row">
+          <label for="setProg">Program Name</label>
+          <input type="text" id="setProg" value="Saints Football — Velocity & Strength" />
+        </div>
+        <div class="field-row">
+          <label for="setSenior">Senior Year Baseline</label>
+          <input type="number" id="setSenior" value="2027" />
+        </div>
+
+        <h2>Google Sheets CSV Direct Sync</h2>
+        <p>Publish individual tabs to web as CSVs and paste URLs below to pull live updates:</p>
+        <div class="field-row">
+          <input type="text" id="lnkAth" placeholder="Athletes CSV URL" />
+        </div>
+        <div class="field-row">
+          <input type="text" id="lnkMet" placeholder="Metrics CSV URL" />
+        </div>
+        <div class="field-row">
+          <input type="text" id="lnkData" placeholder="Data CSV URL" />
+        </div>
+        <button type="button" class="btn" id="fetchLinks">Sync Google Sheets</button>
+        <div class="status-line" id="fetchStatus"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const $ = function(s) { return document.querySelector(s); };     const $$ = function(s) { return document.querySelectorAll(s); };
+
+    const SAMPLE = {
+      athletes: "Name\t#\tPosition\tGrad\nDavid Ortell\t7\tQB\t2027\nColton Beale\t11\tTE\t2027\nJames Adams\t1\tLB\t2027\nKellan Shearin\t15\tWR\t2027\nOwen Fawcett\t52\tC\t2027\nCole Eliason\t18\tQB\t2028",
+      metrics: "Metric\tUnit\tHigherIsBetter\n10yd Fly\ts\tfalse\nBench Press\tlbs\ttrue\nTrap Bar DL\tlbs\ttrue\nVertical\tin\ttrue",
+      data: "Name\tMetric\tValue\tDate\nDavid Ortell\t10yd Fly\t1.08\t2026-08-10\nDavid Ortell\tBench Press\t225\t2026-08-11\nColton Beale\t10yd Fly\t1.12\t2026-08-10\nColton Beale\tTrap Bar DL\t405\t2026-08-11\nJames Adams\tBench Press\t245\t2026-08-11\nKellan Shearin\tVertical\t32.5\t2026-08-10\nOwen Fawcett\tTrap Bar DL\t425\t2026-08-11\nCole Eliason\t10yd Fly\t1.15\t2026-08-10"
+    };
+
+    let store = {
+      rows: [],
+      athletes
