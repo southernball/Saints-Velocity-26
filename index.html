@@ -3,127 +3,142 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dashboard Engine</title>
+<title>Saints Football — Velocity &amp; Strength</title>
 <style>
-:root{
-  color-scheme: light;
-  --surface:#fcfcfb; --card:#ffffff; --line:#e8e7e3; --grid:#efeeea;
-  --ink:#0b0b0b; --ink2:#52514e; --ink3:#8a8984;
-  --accent:#2a78d6; --accent-soft:rgba(42,120,214,.10);
-  --good:#008300; --bad:#e34948; --gold:#fff3d1; --goldline:#eda100;
-  --chipbg:#f1f0ec;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    color-scheme: dark;
-    --surface:#1a1a19; --card:#232322; --line:#3a3936; --grid:#2e2d2b;
-    --ink:#ffffff; --ink2:#c3c2b7; --ink3:#8a8984;
-    --accent:#3987e5; --accent-soft:rgba(57,135,229,.16);
-    --good:#3fae3f; --bad:#e66767; --gold:#3a331d; --goldline:#c98500;
-    --chipbg:#2c2b29;
-  }
-}
-:root[data-theme="dark"]{
+:root {
   color-scheme: dark;
-  --surface:#1a1a19; --card:#232322; --line:#3a3936; --grid:#2e2d2b;
-  --ink:#ffffff; --ink2:#c3c2b7; --ink3:#8a8984;
-  --accent:#3987e5; --accent-soft:rgba(57,135,229,.16);
-  --good:#3fae3f; --bad:#e66767; --gold:#3a331d; --goldline:#c98500;
-  --chipbg:#2c2b29;
+  /* NSA Saints Brand Identity */
+  --navy-deep: #070e17;      /* Primary page background */
+  --navy-surface: #0f1c2d;   /* Cards & panel container backgrounds */
+  --navy-elevated: #16273e;  /* Modals, inputs, table rows on hover */
+  --navy-line: #1f3654;      /* Dividing borders */
+  --grid: #13243a;           /* Internal table grid lines */
+  
+  --gold: #D8A638;           /* Primary Saints Gold */
+  --gold-glow: rgba(216, 166, 56, 0.18);
+  --gold-top3: rgba(216, 166, 56, 0.12);
+  
+  --ink: #ffffff;            /* Crisp white headings/primary text */
+  --ink2: #cad5e2;           /* Subtext & secondary details */
+  --ink3: #7e95b0;           /* Table headers & metadata */
+  
+  --accent: #D8A638;         /* Accent buttons & active tabs */
+  --accent-soft: rgba(216, 166, 56, 0.14);
+  
+  --good: #38c172;           /* Improvements */
+  --bad: #e3342f;            /* Slower times */
+  --chipbg: #142236;
 }
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--surface);color:var(--ink);
+body{margin:0;background:var(--navy-deep);color:var(--ink);
   font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
 .wrap{max-width:1180px;margin:0 auto;padding:16px 20px 60px}
-header.top{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;
-  padding:14px 0 10px;border-bottom:1px solid var(--line)}
-.brand h1{font-size:20px;margin:0;letter-spacing:.2px}
+
+/* Top Branding Header */
+header.top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
+  padding:16px 0 14px;border-bottom:2px solid var(--gold)}
+.brand-wrap{display:flex;align-items:center;gap:12px}
+.brand-logo{width:36px;height:36px;fill:var(--gold);flex-shrink:0}
+.brand h1{font-size:20px;margin:0;letter-spacing:.5px;color:var(--gold);font-weight:700;text-transform:uppercase}
 .brand .sub{color:var(--ink2);font-size:12px;margin-top:2px}
+
 nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
-nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink2);
-  padding:7px 14px;border-radius:18px;font:600 13px inherit;font-family:inherit;cursor:pointer}
-nav.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
-nav.tabs button:hover:not(.on){background:var(--chipbg)}
+nav.tabs button{border:1px solid var(--navy-line);background:var(--navy-surface);color:var(--ink2);
+  padding:8px 16px;border-radius:20px;font:600 13px inherit;cursor:pointer;transition:all .15s ease}
+nav.tabs button.on{background:var(--gold);border-color:var(--gold);color:var(--navy-deep);font-weight:700}
+nav.tabs button:hover:not(.on){background:var(--navy-elevated);color:var(--ink)}
+
 .view{display:none}.view.on{display:block}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 12px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:var(--card);color:var(--ink2);padding:5px 12px;
-  border-radius:15px;font:600 12px inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
-.chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
-.chip:hover:not(.on){background:var(--chipbg)}
+.chip{border:1px solid var(--navy-line);background:var(--navy-surface);color:var(--ink2);padding:6px 13px;
+  border-radius:15px;font:600 12px inherit;cursor:pointer;white-space:nowrap;transition:background .15s}
+.chip.on{background:var(--gold);color:var(--navy-deep);border-color:var(--gold);font-weight:700}
+.chip:hover:not(.on){background:var(--navy-elevated);color:var(--ink)}
+
 .search{flex:1;min-width:170px;max-width:290px;position:relative}
-.search input{width:100%;padding:7px 12px 7px 30px;border:1px solid var(--line);border-radius:16px;
-  background:var(--card);color:var(--ink);font:13px inherit;font-family:inherit}
+.search input{width:100%;padding:7px 12px 7px 30px;border:1px solid var(--navy-line);border-radius:16px;
+  background:var(--navy-surface);color:var(--ink);font:13px inherit}
+.search input:focus{border-color:var(--gold);outline:none}
 .search::before{content:"⌕";position:absolute;left:10px;top:5px;color:var(--ink3);font-size:15px}
 .spacer{flex:1}
+
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
-.tile .lb{font:600 10.5px inherit;font-family:inherit;letter-spacing:.6px;color:var(--ink3);text-transform:uppercase}
-.tile .v{font-size:22px;font-weight:650;margin-top:2px}
-.tile .v.hero{font-size:30px}
+.tile{background:var(--navy-surface);border:1px solid var(--navy-line);border-radius:10px;padding:12px 14px;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.tile .lb{font:600 10.5px inherit;letter-spacing:.6px;color:var(--gold);text-transform:uppercase}
+.tile .v{font-size:22px;font-weight:700;margin-top:2px;color:#fff}
+.tile .v.hero{font-size:30px;color:var(--gold)}
 .tile .d{font-size:12px;color:var(--ink2);margin-top:1px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+
+.card{background:var(--navy-surface);border:1px solid var(--navy-line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
 table.lb{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-table.lb th{font:600 10.5px inherit;font-family:inherit;text-transform:uppercase;letter-spacing:.5px;
-  color:var(--ink3);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:default}
+table.lb th{font:600 11px inherit;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--ink3);text-align:left;padding:8px 8px;border-bottom:1px solid var(--navy-line);white-space:nowrap;cursor:default}
 table.lb th.sortable{cursor:pointer;user-select:none}
-table.lb th.sortable:hover{color:var(--ink)}
-table.lb th.sorted{color:var(--accent)}
-table.lb td{padding:7px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
-table.lb tr.rowbtn{cursor:pointer}
-table.lb tr.rowbtn:hover td{background:var(--accent-soft)}
-table.lb tr.top3 td{background:var(--gold)}
-table.lb tr.top3:hover td{background:var(--gold);box-shadow:inset 0 0 0 99em rgba(42,120,214,.06)}
+table.lb th.sortable:hover{color:var(--gold)}
+table.lb th.sorted{color:var(--gold)}
+table.lb td{padding:9px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}
+table.lb tr.rowbtn{cursor:pointer;transition:background .1s ease}
+table.lb tr.rowbtn:hover td{background:var(--navy-elevated)}
+table.lb tr.top3 td{background:var(--gold-top3)}
+table.lb tr.top3:hover td{background:var(--gold-glow)}
 .rank{font-weight:700}
-td.name{font-weight:600}
-.tag{display:inline-block;background:var(--chipbg);color:var(--ink2);font:600 11px inherit;font-family:inherit;
-  border-radius:9px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+td.name{font-weight:600;color:#fff}
+.tag{display:inline-block;background:var(--chipbg);color:var(--gold);font:600 11px inherit;
+  border-radius:9px;padding:1px 8px;margin-left:6px;vertical-align:1px;border:1px solid var(--navy-line)}
 .delta{font-weight:600}
 .delta.good{color:var(--good)}.delta.bad{color:var(--bad)}.delta.na{color:var(--ink3);font-weight:400}
 .muted{color:var(--ink2)}.small{font-size:12px}.tiny{font-size:11px;color:var(--ink3)}
-h2{font-size:16px;margin:18px 0 8px}
-h3{font-size:14px;margin:0 0 6px}
+h2{font-size:16px;margin:18px 0 8px;color:var(--gold);text-transform:uppercase;letter-spacing:.4px}
+h3{font-size:14px;margin:0 0 6px;color:#fff}
+
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px}
-.mcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.mcard{background:var(--navy-surface);border:1px solid var(--navy-line);border-radius:12px;padding:14px 16px}
 .mcard .mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .mstats{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 4px}
-.mstats .ms .lb{font:600 10px inherit;font-family:inherit;letter-spacing:.5px;color:var(--ink3);text-transform:uppercase}
-.mstats .ms .v{font-size:19px;font-weight:650}
+.mstats .ms .lb{font:600 10px inherit;letter-spacing:.5px;color:var(--gold);text-transform:uppercase}
+.mstats .ms .v{font-size:19px;font-weight:650;color:#fff}
 .mstats .ms .v .u{font-size:12px;color:var(--ink2);font-weight:500}
 .ranksline{font-size:12px;color:var(--ink2);margin:2px 0 6px}
-.ranksline b{color:var(--ink)}
-.backbtn{border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:16px;
-  padding:6px 14px;font:600 12px inherit;font-family:inherit;cursor:pointer;margin-right:8px}
-.backbtn:hover{background:var(--chipbg)}
+.ranksline b{color:var(--gold)}
+
+.backbtn{border:1px solid var(--gold);background:transparent;color:var(--gold);border-radius:16px;
+  padding:6px 14px;font:600 12px inherit;cursor:pointer;margin-right:8px;transition:all .15s}
+.backbtn:hover{background:var(--gold);color:var(--navy-deep)}
 .ath-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
-.ath-h h2{margin:0;font-size:22px}
+.ath-h h2{margin:0;font-size:22px;color:#fff}
 svg text{font-family:inherit}
 .chartbox{position:relative}
-.tooltip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);
+.tooltip{position:absolute;pointer-events:none;background:var(--navy-elevated);color:var(--ink);border:1px solid var(--gold);
   border-radius:7px;padding:6px 9px;font-size:12px;opacity:0;transition:opacity .08s;z-index:5;
-  white-space:nowrap;transform:translate(-50%,-110%)}
-.tooltip .tv{font-weight:700;font-size:13px}
+  white-space:nowrap;transform:translate(-50%,-110%);box-shadow:0 4px 10px rgba(0,0,0,.4)}
+.tooltip .tv{font-weight:700;font-size:13px;color:var(--gold)}
+
 details.slog{margin-top:6px}
-details.slog summary{cursor:pointer;color:var(--ink2);font-size:12px}
+details.slog summary{cursor:pointer;color:var(--gold);font-size:12px}
 details.slog table{margin-top:6px;font-size:12px}
 .pastegrid{display:grid;grid-template-columns:1fr;gap:12px}
-textarea.paste{width:100%;min-height:130px;border:1.5px dashed var(--line);border-radius:10px;
-  background:var(--surface);color:var(--ink);font:12px ui-monospace,Consolas,monospace;padding:10px;resize:vertical}
-textarea.paste:focus{border-color:var(--accent);outline:none}
+textarea.paste{width:100%;min-height:130px;border:1.5px dashed var(--navy-line);border-radius:10px;
+  background:var(--navy-surface);color:var(--ink);font:12px ui-monospace,Consolas,monospace;padding:10px;resize:vertical}
+textarea.paste:focus{border-color:var(--gold);outline:none}
+
 .statusrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:10px 0}
-.st{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
+.st{border:1px solid var(--navy-line);border-radius:10px;padding:10px 12px;background:var(--navy-surface)}
 .st .ok{color:var(--good);font-weight:700}
 .st .no{color:var(--ink3)}
-.btn{border:0;background:var(--accent);color:#fff;padding:8px 16px;border-radius:18px;
-  font:600 13px inherit;font-family:inherit;cursor:pointer}
-.btn.ghost{background:var(--card);color:var(--ink2);border:1px solid var(--line)}
-.btn:hover{filter:brightness(1.06)}
+
+.btn{border:0;background:var(--gold);color:var(--navy-deep);padding:8px 16px;border-radius:18px;
+  font:700 13px inherit;cursor:pointer;transition:all .15s}
+.btn.ghost{background:var(--navy-surface);color:var(--ink2);border:1px solid var(--navy-line)}
+.btn:hover{filter:brightness(1.12)}
 .formrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
 .formrow label{font-size:13px;color:var(--ink2);min-width:170px}
 .formrow input[type=text],.formrow input[type=number],.formrow input[type=url]{
-  padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);
-  color:var(--ink);font:13px inherit;font-family:inherit;min-width:230px}
-.note{font-size:12px;color:var(--ink2);background:var(--chipbg);border-radius:8px;padding:8px 12px;margin:8px 0}
+  padding:6px 10px;border:1px solid var(--navy-line);border-radius:8px;background:var(--navy-surface);
+  color:var(--ink);font:13px inherit;min-width:230px}
+.formrow input:focus{border-color:var(--gold);outline:none}
+.note{font-size:12px;color:var(--ink2);background:var(--chipbg);border-radius:8px;padding:8px 12px;margin:8px 0;border-left:3px solid var(--gold)}
 .warnbox{font-size:12px;color:var(--bad);margin:6px 0;white-space:pre-line}
 .empty{padding:40px 20px;text-align:center;color:var(--ink2)}
 .medal{font-weight:800}
@@ -133,9 +148,15 @@ textarea.paste:focus{border-color:var(--accent);outline:none}
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand">
-      <h1 id="progName">Dashboard Engine</h1>
-      <div class="sub" id="asOf">No data loaded yet</div>
+    <div class="brand-wrap">
+      <!-- Fleur-de-lis SVG Icon -->
+      <svg class="brand-logo" viewBox="0 0 24 24">
+        <path d="M12 2C11.5 5 9.5 7.5 7 8c1.5 1 2.5 3 2 5.5-1.5-1-3.5-1-5 0 1.5 1.5 3 2 3.5 4.5.5 2-1 3-1.5 3 2 .5 5-1 6-3 1 2 4 3.5 6 3-.5 0-2-1-1.5-3 .5-2.5 2-3 3.5-4.5-1.5-1-3.5-1-5 0-.5-2.5.5-4.5 2-5.5-2.5-.5-4.5-3-5-6zm-1 20h2v1h-2v-1z"/>
+      </svg>
+      <div class="brand">
+        <h1 id="progName">Saints Football — Velocity &amp; Strength</h1>
+        <div class="sub" id="asOf">No data loaded yet</div>
+      </div>
     </div>
     <nav class="tabs" id="tabs">
       <button data-v="team" class="on">Team</button>
@@ -611,7 +632,8 @@ function statsFor(id, metricName){
   return { def, reps:reps.length, pr, avg:sum/reps.length, sessions, latest, prev, delta, improved,
     prDate:(() => { let d=null; for(const s of sessions){ if(s.best === pr){ d = s.date; if(def.dir==="lower"?true:true) break; } } return d; })() };
 }
-/* leaderboard for a metric: every athlete who has data on it, within a gender/sport pool */
+
+/* leaderboard for a metric */
 function board(metricName, pool){
   const def = metricDef(metricName);
   const ids = new Set();
@@ -631,6 +653,7 @@ function board(metricName, pool){
   rows.forEach(r => { byGrade[r.g.key] = (byGrade[r.g.key]||0) + 1; r.gradeRank = byGrade[r.g.key]; });
   return { def, rows, currentCount:c };
 }
+
 /* ================= rendering ================= */
 const $ = s => document.querySelector(s);
 function el(tag, cls, text){
@@ -670,7 +693,7 @@ function sparkline(sessions, def){
   const W = 96, H = 26, P = 3;
   const svg = sv("svg", { width:W, height:H, viewBox:`0 0 ${W} ${H}` });
   if(sessions.length < 2){
-    const c = sv("circle", { cx:W/2, cy:H/2, r:3, fill:"var(--accent)" });
+    const c = sv("circle", { cx:W/2, cy:H/2, r:3, fill:"var(--gold)" });
     svg.appendChild(c); return svg;
   }
   const vals = sessions.map(s => s.best);
@@ -679,13 +702,13 @@ function sparkline(sessions, def){
   const x = i => P + i * (W - 2*P) / (sessions.length - 1);
   const y = v => { const t = (v - lo) / (hi - lo); const yy = def.dir === "lower" ? t : 1 - t; return P + yy * (H - 2*P); };
   const pts = sessions.map((s,i) => x(i) + "," + y(s.best)).join(" ");
-  svg.appendChild(sv("polyline", { points:pts, fill:"none", stroke:"var(--accent)", "stroke-width":2, "stroke-linecap":"round", "stroke-linejoin":"round" }));
+  svg.appendChild(sv("polyline", { points:pts, fill:"none", stroke:"var(--gold)", "stroke-width":2, "stroke-linecap":"round", "stroke-linejoin":"round" }));
   const last = sessions.length - 1;
-  svg.appendChild(sv("circle", { cx:x(last), cy:y(vals[last]), r:3, fill:"var(--accent)", stroke:"var(--card)", "stroke-width":2 }));
+  svg.appendChild(sv("circle", { cx:x(last), cy:y(vals[last]), r:3, fill:"var(--gold)", stroke:"var(--navy-surface)", "stroke-width":2 }));
   return svg;
 }
 
-/* full trend chart: line through session bests + dots per rep, crosshair tooltip */
+/* full trend chart */
 function trendChart(stats){
   const sessions = stats.sessions, def = stats.def;
   const W = 640, H = 210, L = 48, R = 26, T = 14, B = 30;
@@ -700,14 +723,14 @@ function trendChart(stats){
   const n = sessions.length;
   const x = i => n === 1 ? (L + (W-L-R)/2) : L + i * (W - L - R) / (n - 1);
   const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
-  /* gridlines + y ticks (3 clean-ish) */
+  /* gridlines */
   for(let k = 0; k <= 3; k++){
     const v = lo + (hi - lo) * k / 3, yy = y(v);
     svg.appendChild(sv("line", { x1:L, x2:W-R, y1:yy, y2:yy, stroke:"var(--grid)", "stroke-width":1 }));
     const t = sv("text", { x:L-6, y:yy+4, "text-anchor":"end", "font-size":11, fill:"var(--ink3)" });
     t.textContent = fmtVal(v, def); svg.appendChild(t);
   }
-  /* x labels — sparse */
+  /* x labels */
   const step = Math.max(1, Math.ceil(n / 7));
   sessions.forEach((s,i) => {
     if(i % step === 0 || i === n-1){
@@ -716,25 +739,25 @@ function trendChart(stats){
       t.textContent = fmtDate(s.date); svg.appendChild(t);
     }
   });
-  /* rep dots (lighter) */
+  /* rep dots */
   sessions.forEach((s,i) => s.reps.forEach(v => {
-    svg.appendChild(sv("circle", { cx:x(i), cy:y(v), r:3.4, fill:"var(--accent)", opacity:0.32 }));
+    svg.appendChild(sv("circle", { cx:x(i), cy:y(v), r:3.4, fill:"var(--gold)", opacity:0.35 }));
   }));
-  /* session-best line + dots */
+  /* session-best line */
   if(n > 1){
     svg.appendChild(sv("polyline", { points:sessions.map((s,i)=>x(i)+","+y(s.best)).join(" "),
-      fill:"none", stroke:"var(--accent)", "stroke-width":2, "stroke-linecap":"round", "stroke-linejoin":"round" }));
+      fill:"none", stroke:"var(--gold)", "stroke-width":2, "stroke-linecap":"round", "stroke-linejoin":"round" }));
   }
   sessions.forEach((s,i) => {
     const isPR = s.best === stats.pr;
-    svg.appendChild(sv("circle", { cx:x(i), cy:y(s.best), r:isPR?5:4, fill:"var(--accent)", stroke:"var(--card)", "stroke-width":2 }));
+    svg.appendChild(sv("circle", { cx:x(i), cy:y(s.best), r:isPR?5:4, fill:"var(--gold)", stroke:"var(--navy-surface)", "stroke-width":2 }));
     if(isPR){
-      const t = sv("text", { x:x(i), y:y(s.best)-9, "text-anchor":"middle", "font-size":11, "font-weight":700, fill:"var(--ink)" });
+      const t = sv("text", { x:x(i), y:y(s.best)-9, "text-anchor":"middle", "font-size":11, "font-weight":700, fill:"var(--gold)" });
       t.textContent = "PR " + fmtVal(s.best, def); svg.appendChild(t);
     }
   });
   /* crosshair + tooltip */
-  const cross = sv("line", { x1:0, x2:0, y1:T, y2:H-B, stroke:"var(--ink3)", "stroke-width":1, opacity:0 });
+  const cross = sv("line", { x1:0, x2:0, y1:T, y2:H-B, stroke:"var(--gold)", "stroke-width":1, opacity:0 });
   svg.appendChild(cross);
   const tip = $("#tip");
   function showAt(clientX, clientY){
@@ -874,7 +897,7 @@ function renderTeam(){
   rows = rows.slice().sort((x,y) => {
     const a = fn(x), c = fn(y);
     if(a === nul && c === nul) return 0;
-    if(a === nul) return 1;               /* nulls always last */
+    if(a === nul) return 1;
     if(c === nul) return -1;
     const cmp = typeof a === "string" ? a.localeCompare(c) : a - c;
     return ui.sort.asc ? cmp : -cmp;
@@ -961,7 +984,6 @@ function renderAthletes(){
   heads.forEach(h => trh.appendChild(el("th", null, h)));
   thead.appendChild(trh); tbl.appendChild(thead);
   const tbody = el("tbody");
-  const boards = {}; mets.forEach(m => boards[m] = board(m, {}));
   const poolBoards = new Map();
   function boardFor(a, m){
     const pool = {};
@@ -1103,7 +1125,9 @@ function renderRecords(){
     rows.forEach((r,i) => {
       const tr = el("tr", "rowbtn" + (i < 3 ? " top3" : ""));
       tr.addEventListener("click", () => openAthlete(r.id));
-      tr.appendChild(el("td", "rank", i < 3 ? ["🥇","🥈","🥉"][i] : "#" + (i+1)));
+      const tdR = el("td", "rank", i < 3 ? ["🥇","🥈","🥉"][i] : "#" + (i+1));
+      if(i < 3) tdR.classList.add("medal");
+      tr.appendChild(tdR);
       tr.appendChild(el("td", "name", dispName(r.a, r.id)));
       tr.appendChild(el("td", "muted", ui.recScope === "current" ? r.g.label : (r.a && r.a.grad ? String(r.a.grad) : "—")));
       tr.appendChild(el("td", null, fmtVal(r.s.pr, b.def)));
@@ -1133,7 +1157,7 @@ function renderData(){
 
 /* ---------- shell ---------- */
 function renderHeader(){
-  $("#progName").textContent = store.settings.program || "Dashboard Engine";
+  $("#progName").textContent = store.settings.program || "Saints Football — Velocity & Strength";
   let latest = 0; store.rows.forEach(r => { if(r.date > latest) latest = r.date; });
   $("#asOf").textContent = store.rows.length
     ? store.rows.length + " results · " + store.athletes.length + " athletes · data through " + fmtDateLong(latest)
@@ -1185,7 +1209,7 @@ $("#pasteBox").addEventListener("input", e => {
 });
 $("#loadSample").addEventListener("click", () => {
   ingest(SAMPLE.athletes); ingest(SAMPLE.metrics); ingest(SAMPLE.data);
-  if(!store.settings.program) store.settings.program = "Sample: Josh S — Football Speed & Strength";
+  if(!store.settings.program) store.settings.program = "Saints Football — Velocity & Strength";
   saveStore(); ui.metric = null; render();
 });
 $("#clearAll").addEventListener("click", () => {
@@ -1244,7 +1268,6 @@ if (!store.rows.length) {
 }
 render();
 refreshFromLinks(false);
-
 </script>
 </body>
 </html>
