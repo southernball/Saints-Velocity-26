@@ -494,7 +494,7 @@ function el(tag, cls, text){
 }
 function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
 
-const ui = { view:"team", metric:null, grade:"All", scope:"current", sport:"All", gender:"All",
+const ui = { view:"team", metric:null, grade:"All", scope:"recent", sport:"All", gender:"All",
   recScope:"all", recSport:"All", recGender:"All",
   teamQ:"", athQ:"", athGrade:"All", athSport:"All", athGender:"All",
   athlete:null, sort:{ key:"rank", asc:true } };
@@ -641,7 +641,20 @@ function renderTeam(){
   ui.sport = facetChips($("#sportChips"), "sport", "All sports", ui.sport, k => { ui.sport = k; render(); });
   ui.gender = facetChips($("#genderChips"), "gender", "Boys + Girls", ui.gender, k => { ui.gender = k; render(); });
   chipRow($("#gradeChips"), gradeChipItems(), ui.grade, k => { ui.grade = k; render(); });
-  chipRow($("#scopeChips"), [{ key:"current", label:"Current team" }, { key:"all", label:"All-time (incl. alumni)" }], ui.scope, k => { ui.scope = k; render(); });
+
+  let latestDateForMetric = 0;
+  store.rows.forEach(r => {
+    if(r.metric.toLowerCase() === (ui.metric||"").toLowerCase() && r.date > latestDateForMetric){
+      latestDateForMetric = r.date;
+    }
+  });
+
+  const scopeLabels = [
+    { key:"recent", label:"Latest session (" + (latestDateForMetric ? fmtDate(latestDateForMetric) : "—") + ")" },
+    { key:"current", label:"Current team (PRs)" },
+    { key:"all", label:"All-time (incl. alumni)" }
+  ];
+  chipRow($("#scopeChips"), scopeLabels, ui.scope, k => { ui.scope = k; render(); });
 
   const tiles = $("#teamTiles"), tbl = $("#lbTable"), empty = $("#teamEmpty");
   clear(tiles); clear(tbl);
@@ -653,82 +666,99 @@ function renderTeam(){
   empty.style.display = "none";
   const b = board(ui.metric, { sport:ui.sport, gender:ui.gender });
   let rows = b.rows;
-  if(ui.scope === "current") rows = rows.filter(r => r.g.current);
+
+  if(ui.scope === "recent"){
+    rows = rows.filter(r => r.s.latest && r.s.latest.date === latestDateForMetric);
+  } else if(ui.scope === "current"){
+    rows = rows.filter(r => r.g.current);
+  }
   if(ui.grade !== "All") rows = rows.filter(r => r.g.key === ui.grade);
   const q = ui.teamQ.trim().toLowerCase();
   if(q) rows = rows.filter(r => (dispName(r.a, r.id) + " " + r.id).toLowerCase().includes(q));
 
+  // If viewing latest session, rank by that session's mark
+  if(ui.scope === "recent"){
+    rows = rows.slice().sort((x,y) => b.def.dir === "lower" ? x.s.latest.best - y.s.latest.best : y.s.latest.best - x.s.latest.best);
+  }
+
   const leader = rows[0];
   const t1 = el("div", "tile");
-  t1.appendChild(el("div", "lb", (ui.scope === "current" ? "Fastest right now" : "All-time best") + (b.def.dir === "higher" ? " (best)" : "")));
+  const t1Label = ui.scope === "recent" ? "Fastest this session" : (ui.scope === "current" ? "Fastest current team" : "All-time best");
+  t1.appendChild(el("div", "lb", t1Label));
   if(leader){
-    t1.appendChild(el("div", "v hero", fmtVal(leader.s.pr, b.def) + (b.def.unit ? " " : "")));
-    const m = mph(b.def, leader.s.pr);
+    const leadVal = ui.scope === "recent" ? leader.s.latest.best : leader.s.pr;
+    t1.appendChild(el("div", "v hero", fmtVal(leadVal, b.def) + (b.def.unit ? " " : "")));
+    const m = mph(b.def, leadVal);
     t1.appendChild(el("div", "d", dispName(leader.a, leader.id) + (m ? " · " + m.toFixed(1) + " mph" : "")));
   } else t1.appendChild(el("div", "v", "—"));
   tiles.appendChild(t1);
 
-  const avgAll = rows.length ? rows.reduce((s,r) => s + r.s.pr, 0) / rows.length : null;
+  const avgVal = rows.length 
+    ? rows.reduce((s,r) => s + (ui.scope === "recent" ? r.s.latest.best : r.s.pr), 0) / rows.length 
+    : null;
   const t2 = el("div", "tile");
-  t2.appendChild(el("div", "lb", "Average PR (this group)"));
-  t2.appendChild(el("div", "v", avgAll === null ? "—" : fmtVal(avgAll, b.def)));
+  t2.appendChild(el("div", "lb", ui.scope === "recent" ? "Session average" : "Average PR (group)"));
+  t2.appendChild(el("div", "v", avgVal === null ? "—" : fmtVal(avgVal, b.def)));
   t2.appendChild(el("div", "d", rows.length + " athletes"));
   tiles.appendChild(t2);
 
-  let latest = 0; store.rows.forEach(r => { if(r.metric.toLowerCase() === ui.metric.toLowerCase() && r.date > latest) latest = r.date; });
   const t3 = el("div", "tile");
-  t3.appendChild(el("div", "lb", "Last session"));
-  t3.appendChild(el("div", "v", latest ? fmtDate(latest) : "—"));
-  const nLatest = new Set(store.rows.filter(r => r.date === latest && r.metric.toLowerCase() === ui.metric.toLowerCase()).map(r => r.id)).size;
+  t3.appendChild(el("div", "lb", "Session date"));
+  t3.appendChild(el("div", "v", latestDateForMetric ? fmtDate(latestDateForMetric) : "—"));
+  const nLatest = new Set(store.rows.filter(r => r.date === latestDateForMetric && r.metric.toLowerCase() === ui.metric.toLowerCase()).map(r => r.id)).size;
   t3.appendChild(el("div", "d", nLatest ? nLatest + " athletes tested" : ""));
   tiles.appendChild(t3);
 
   const improvers = rows.filter(r => r.s.improved > 0).length;
   const t4 = el("div", "tile");
-  t4.appendChild(el("div", "lb", "Improved last session"));
+  t4.appendChild(el("div", "lb", "Improved vs previous"));
   t4.appendChild(el("div", "v", rows.some(r => r.s.improved !== null) ? improvers + " of " + rows.filter(r => r.s.improved !== null).length : "—"));
-  t4.appendChild(el("div", "d", "vs. their previous session"));
+  t4.appendChild(el("div", "d", "athletes set faster mark"));
   tiles.appendChild(t4);
 
   const hasMph = !!b.def.dist;
   const dirLower = b.def.dir === "lower";
   const nul = Symbol("null");
   const keyFns = {
-    rank:  r => r.allRank,
+    rank:  (r, idx) => idx,
     name:  r => dispName(r.a, r.id).toLowerCase(),
     grade: r => r.g.key === "Alum" ? 99 : (r.g.key === "?" ? 100 : Number(r.g.key)),
+    mark:  r => ui.scope === "recent" ? (dirLower ? r.s.latest.best : -r.s.latest.best) : r.allRank,
     pr:    r => r.allRank,
-    mph:   r => { const m = mph(b.def, r.s.pr); return m === null ? nul : m; },
+    mph:   r => { const m = mph(b.def, ui.scope === "recent" ? r.s.latest.best : r.s.pr); return m === null ? nul : m; },
     avg:   r => dirLower ? r.s.avg : -r.s.avg,
     delta: r => r.s.delta === null ? nul : (dirLower ? -r.s.delta : r.s.delta),
   };
-  const defaultAsc = { rank:true, name:true, grade:true, pr:true, mph:false, avg:true, delta:false };
+  const defaultAsc = { rank:true, name:true, grade:true, mark:true, pr:true, mph:false, avg:true, delta:false };
   const cols = [
     { key:"rank",  label:"#" },
     { key:"name",  label:"Athlete" },
     { key:"grade", label:"Gr" },
-    { key:"pr",    label:"PR" },
+    { key:"mark",  label: ui.scope === "recent" ? "Session Best" : "PR" },
+    ui.scope === "recent" ? { key:"pr", label:"All-Time PR" } : null,
     hasMph ? { key:"mph", label:"MPH" } : null,
     { key:"avg",   label:"Avg" },
     { key:"delta", label:"Last Δ" },
     { key:null,    label:"Trend" },
   ].filter(Boolean);
+
   if(!(ui.sort.key in keyFns)) ui.sort = { key:"rank", asc:true };
   const fn = keyFns[ui.sort.key];
   rows = rows.slice().sort((x,y) => {
-    const a = fn(x), c = fn(y);
+    const a = fn(x, 0), c = fn(y, 0);
     if(a === nul && c === nul) return 0;
     if(a === nul) return 1;
     if(c === nul) return -1;
     const cmp = typeof a === "string" ? a.localeCompare(c) : a - c;
     return ui.sort.asc ? cmp : -cmp;
   });
+
   const thead = el("thead"), trh = el("tr");
   cols.forEach(col => {
     const th = el("th", null, col.label + (col.key && ui.sort.key === col.key ? (ui.sort.asc ? " ▲" : " ▼") : ""));
     if(col.key){
       th.className = "sortable" + (ui.sort.key === col.key ? " sorted" : "");
-      th.title = col.key === "delta" ? "Click to rank by improvement vs. previous session" : "Click to sort";
+      th.title = "Click to sort";
       th.addEventListener("click", () => {
         if(ui.sort.key === col.key) ui.sort.asc = !ui.sort.asc;
         else ui.sort = { key:col.key, asc:defaultAsc[col.key] };
@@ -739,19 +769,39 @@ function renderTeam(){
   });
   thead.appendChild(trh); tbl.appendChild(thead);
   const tbody = el("tbody");
-  rows.forEach(r => {
-    const rank = ui.scope === "current" ? r.curRank : r.allRank;
-    const tr = el("tr", "rowbtn" + (rank <= 3 ? " top3" : ""));
+  rows.forEach((r, idx) => {
+    const displayRank = idx + 1;
+    const isTop3 = displayRank <= 3;
+    const tr = el("tr", "rowbtn" + (isTop3 ? " top3" : ""));
     tr.addEventListener("click", () => openAthlete(r.id));
-    const tdR = el("td", "rank", rank <= 3 ? ["🥇","🥈","🥉"][rank-1] : "#" + rank);
-    if(rank <= 3) tdR.classList.add("medal");
+    
+    const tdR = el("td", "rank", isTop3 ? ["🥇","🥈","🥉"][displayRank-1] : "#" + displayRank);
+    if(isTop3) tdR.classList.add("medal");
     tr.appendChild(tdR);
+
     const tdN = el("td", "name", dispName(r.a, r.id));
-    if(ui.scope === "all" && !r.g.current) tdN.appendChild(el("span", "tag", "Class of " + (r.a && r.a.grad ? r.a.grad : "?")));
+    if(!r.g.current) tdN.appendChild(el("span", "tag", "Class of " + (r.a && r.a.grad ? r.a.grad : "?")));
     tr.appendChild(tdN);
+
     tr.appendChild(el("td", "muted", r.g.label));
-    tr.appendChild(el("td", null, fmtVal(r.s.pr, b.def)));
-    if(hasMph){ const m = mph(b.def, r.s.pr); tr.appendChild(el("td", "muted", m ? m.toFixed(1) : "—")); }
+    
+    // Main Display Mark
+    const activeVal = ui.scope === "recent" ? r.s.latest.best : r.s.pr;
+    const tdMark = el("td", null, fmtVal(activeVal, b.def));
+    if(ui.scope === "recent" && activeVal === r.s.pr){
+      tdMark.appendChild(el("span", "tag", "PR"));
+    }
+    tr.appendChild(tdMark);
+
+    // If recent session, also show all-time PR in separate column
+    if(ui.scope === "recent"){
+      tr.appendChild(el("td", "muted", fmtVal(r.s.pr, b.def)));
+    }
+
+    if(hasMph){ 
+      const m = mph(b.def, activeVal); 
+      tr.appendChild(el("td", "muted", m ? m.toFixed(1) : "—")); 
+    }
     tr.appendChild(el("td", "muted", fmtVal(r.s.avg, b.def)));
     const tdD = el("td");
     const dl = fmtDelta(r.s.delta, r.s.improved, b.def);
@@ -765,7 +815,7 @@ function renderTeam(){
   tbl.appendChild(tbody);
   if(!rows.length){
     empty.style.display = "block";
-    empty.textContent = "Nobody matches that filter.";
+    empty.textContent = "Nobody tested on this date or matches the filter.";
   }
 }
 
