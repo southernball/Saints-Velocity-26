@@ -429,8 +429,13 @@ function distinct(field){
   return [...set].sort();
 }
 function poolMatch(a, pool){
-  if(pool && pool.gender && pool.gender !== "All"){ if(!a || a.gender !== pool.gender) return false; }
-  if(pool && pool.sport && pool.sport !== "All"){ if(!a || a.sport.toLowerCase() !== pool.sport.toLowerCase()) return false; }
+  if(!a) return false;
+  if(pool && pool.gender && pool.gender !== "All"){ 
+    if(String(a.gender || "").trim().toLowerCase() !== pool.gender.trim().toLowerCase()) return false; 
+  }
+  if(pool && pool.sport && pool.sport !== "All"){ 
+    if(String(a.sport || "").trim().toLowerCase() !== pool.sport.trim().toLowerCase()) return false; 
+  }
   return true;
 }
 function metricDef(name){
