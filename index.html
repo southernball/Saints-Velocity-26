@@ -675,7 +675,7 @@ function renderTeam(){
   ui.gender = facetChips($("#genderChips"), "gender", "Boys + Girls", ui.gender, k => { ui.gender = k; render(); });
   chipRow($("#gradeChips"), gradeChipItems(), ui.grade, k => { ui.grade = k; render(); });
 
- let latestDateForMetric = 0;
+  let latestDateForMetric = 0;
   store.rows.forEach(r => {
     if(r.metric.toLowerCase() === (ui.metric||"").toLowerCase()){
       const a = athleteById(r.id);
@@ -737,7 +737,7 @@ function renderTeam(){
   t2.appendChild(el("div", "d", rows.length + " athletes"));
   tiles.appendChild(t2);
 
-const t3 = el("div", "tile");
+  const t3 = el("div", "tile");
   t3.appendChild(el("div", "lb", "Session date"));
   t3.appendChild(el("div", "v", latestDateForMetric ? fmtDate(latestDateForMetric) : "—"));
   const nLatest = new Set(
