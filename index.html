@@ -659,7 +659,6 @@ function gradeChipItems(){
   store.athletes.forEach(a => present.add(gradeOf(a).key));
   const items = [{ key:"All", label:"All grades" }];
   
-  // Supports Middle School (6th, 7th, 8th) through High School (9th-12th)
   const suffixes = { "6":"6th", "7":"7th", "8":"8th", "9":"9th", "10":"10th", "11":"11th", "12":"12th" };
   ["6","7","8","9","10","11","12"].forEach(g => { 
     if(present.has(g)) items.push({ key:g, label:suffixes[g] }); 
@@ -854,7 +853,7 @@ function renderAthletes(){
   if(ui.athlete){ renderAthleteDetail(ui.athlete); return; }
   $("#athHome").style.display = ""; $("#athDetail").style.display = "none";
   ui.athSport = facetChips($("#athSportChips"), "sport", "All sports", ui.athSport, k => { ui.athSport = k; render(); });
-  ui.athGender = facetChips($("#athGenderChips"), "gender", "Boys + Girls", ui.gender, k => { ui.athGender = k; render(); });
+  ui.athGender = facetChips($("#athGenderChips"), "gender", "Boys + Girls", ui.athGender, k => { ui.athGender = k; render(); });
   chipRow($("#athGradeChips"), gradeChipItems(), ui.athGrade, k => { ui.athGrade = k; render(); });
   const tbl = $("#athTable"), empty = $("#athEmpty");
   clear(tbl);
@@ -1170,7 +1169,22 @@ $("#fetchLinks").addEventListener("click", async () => {
 /* ---------- boot ---------- */
 loadStore();
 render();
-refreshAllTabs(false);
+
+// Automatically syncs with Google Sheets or loads CSVs
+Promise.all([
+  fetch('athletes.csv').then(r => { if(r.ok) return r.text().then(t => ingest(t)); }),
+  fetch('metrics.csv').then(r => { if(r.ok) return r.text().then(t => ingest(t)); }),
+  fetch('data.csv').then(r => { if(r.ok) return r.text().then(t => ingest(t)); })
+]).then(() => {
+  if (store.rows.length) {
+    saveStore();
+    render();
+  } else {
+    refreshAllTabs(false);
+  }
+}).catch(() => {
+  refreshAllTabs(false);
+});
 </script>
 </body>
 </html>
