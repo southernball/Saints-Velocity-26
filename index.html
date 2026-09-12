@@ -168,7 +168,7 @@ textarea.paste:focus{border-color:var(--gold);outline:none}
       </svg>
       <div>
         <h1 id="progName">Saints Velocity &amp; Strength</h1>
-        <div class="sub" id="asOf">Loading Google Sheet data…</div>
+        <div class="sub" id="asOf">Loading performance data…</div>
       </div>
     </div>
     <nav class="tabs" id="tabs">
@@ -242,8 +242,9 @@ textarea.paste:focus{border-color:var(--gold);outline:none}
       <div class="st"><div class="lb tiny">METRICS (definitions)</div><div id="stMet" class="no">nothing yet</div></div>
     </div>
     <div class="formrow">
+      <button class="btn" id="forceRefreshBtn">↻ Force Fetch Latest from GitHub</button>
       <button class="btn ghost" id="loadSample">Load fallback sample (Fly 10s)</button>
-      <button class="btn ghost" id="clearAll">Clear everything</button>
+      <button class="btn ghost" id="clearAll">Clear cache &amp; reset</button>
     </div>
 
     <h2>Settings</h2>
@@ -1065,7 +1066,7 @@ function renderHeader(){
   let latest = 0; store.rows.forEach(r => { if(r.date > latest) latest = r.date; });
   $("#asOf").textContent = store.rows.length
     ? store.rows.length + " results · " + store.athletes.length + " athletes · data through " + fmtDateLong(latest)
-    : "Syncing Google Sheets…";
+    : "Syncing latest data…";
 }
 
 function render(){
@@ -1117,8 +1118,10 @@ $("#loadSample").addEventListener("click", () => {
   saveStore(); ui.metric = null; render();
 });
 $("#clearAll").addEventListener("click", () => {
+  localStorage.removeItem("de_store");
   store.rows = []; store.athletes = []; store.metrics = [];
   store.settings.program = ""; saveStore(); ui.metric = null; ui.athlete = null; render();
+  location.reload(true);
 });
 ["setProg","setSenior","setShort"].forEach(id => {
   document.getElementById(id).addEventListener("change", () => {
@@ -1132,7 +1135,7 @@ $("#clearAll").addEventListener("click", () => {
 async function fetchCsv(url, tag){
   if(!url) return null;
   const buster = (url.indexOf("?") > -1 ? "&" : "?") + "_t=" + Date.now();
-  const r = await fetch(url + buster, { redirect:"follow" });
+  const r = await fetch(url + buster, { cache: "no-store", redirect:"follow" });
   if(!r.ok) throw new Error(tag + ": HTTP " + r.status);
   const t = await r.text();
   const res = ingest(t);
@@ -1166,6 +1169,41 @@ async function refreshAllTabs(verbose){
   }
 }
 
+async function loadRepoFiles(){
+  const buster = "?_t=" + Date.now();
+  const files = [
+    { name: "athletes.csv", tag: "Athletes" },
+    { name: "metrics.csv", tag: "Metrics" },
+    { name: "data.csv", tag: "Data" }
+  ];
+  let anyLoaded = false;
+  for (const f of files) {
+    try {
+      const res = await fetch(f.name + buster, { cache: "no-store" });
+      if (res.ok) {
+        const txt = await res.text();
+        const ing = ingest(txt);
+        if (ing.ok) anyLoaded = true;
+      }
+    } catch(e){}
+  }
+  if (anyLoaded) {
+    saveStore();
+    render();
+    return true;
+  }
+  return false;
+}
+
+$("#forceRefreshBtn").addEventListener("click", async () => {
+  const btn = $("#forceRefreshBtn");
+  btn.textContent = "Fetching…";
+  const ok = await loadRepoFiles();
+  if (!ok) await refreshAllTabs(true);
+  btn.textContent = "✓ Updated!";
+  setTimeout(() => { btn.textContent = "↻ Force Fetch Latest from GitHub"; }, 2000);
+});
+
 $("#fetchLinks").addEventListener("click", async () => {
   store.links.data = $("#lnkData").value.trim();
   store.links.athletes = $("#lnkAth").value.trim();
@@ -1178,20 +1216,9 @@ $("#fetchLinks").addEventListener("click", async () => {
 loadStore();
 render();
 
-// Automatically syncs with Google Sheets or loads CSVs
-Promise.all([
-  fetch('athletes.csv').then(r => { if(r.ok) return r.text().then(t => ingest(t)); }),
-  fetch('metrics.csv').then(r => { if(r.ok) return r.text().then(t => ingest(t)); }),
-  fetch('data.csv').then(r => { if(r.ok) return r.text().then(t => ingest(t)); })
-]).then(() => {
-  if (store.rows.length) {
-    saveStore();
-    render();
-  } else {
-    refreshAllTabs(false);
-  }
-}).catch(() => {
-  refreshAllTabs(false);
+// Startup sync: pulls latest files with cache-busting
+loadRepoFiles().then(loaded => {
+  if (!loaded) refreshAllTabs(false);
 });
 </script>
 </body>
