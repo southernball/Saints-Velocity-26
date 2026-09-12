@@ -675,10 +675,13 @@ function renderTeam(){
   ui.gender = facetChips($("#genderChips"), "gender", "Boys + Girls", ui.gender, k => { ui.gender = k; render(); });
   chipRow($("#gradeChips"), gradeChipItems(), ui.grade, k => { ui.grade = k; render(); });
 
-  let latestDateForMetric = 0;
+ let latestDateForMetric = 0;
   store.rows.forEach(r => {
-    if(r.metric.toLowerCase() === (ui.metric||"").toLowerCase() && r.date > latestDateForMetric){
-      latestDateForMetric = r.date;
+    if(r.metric.toLowerCase() === (ui.metric||"").toLowerCase()){
+      const a = athleteById(r.id);
+      if(poolMatch(a, { sport: ui.sport, gender: ui.gender }) && r.date > latestDateForMetric){
+        latestDateForMetric = r.date;
+      }
     }
   });
 
@@ -734,10 +737,15 @@ function renderTeam(){
   t2.appendChild(el("div", "d", rows.length + " athletes"));
   tiles.appendChild(t2);
 
-  const t3 = el("div", "tile");
+const t3 = el("div", "tile");
   t3.appendChild(el("div", "lb", "Session date"));
   t3.appendChild(el("div", "v", latestDateForMetric ? fmtDate(latestDateForMetric) : "—"));
-  const nLatest = new Set(store.rows.filter(r => r.date === latestDateForMetric && r.metric.toLowerCase() === ui.metric.toLowerCase()).map(r => r.id)).size;
+  const nLatest = new Set(
+    store.rows
+      .filter(r => r.date === latestDateForMetric && r.metric.toLowerCase() === (ui.metric||"").toLowerCase())
+      .filter(r => poolMatch(athleteById(r.id), { sport: ui.sport, gender: ui.gender }))
+      .map(r => r.id)
+  ).size;
   t3.appendChild(el("div", "d", nLatest ? nLatest + " athletes tested" : ""));
   tiles.appendChild(t3);
 
